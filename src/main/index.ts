@@ -344,6 +344,9 @@ function createWindow(): void {
   }
 
   // --- AUTO UPDATER LOGIC ---
+  autoUpdater.autoDownload = false;
+  autoUpdater.allowPrerelease = true;
+
   autoUpdater.on('checking-for-update', () => {
     mainWindow.webContents.send('update-status', { status: 'checking', message: 'Checking for updates...' });
   });

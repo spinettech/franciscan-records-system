@@ -31,3 +31,5 @@ publish:
   provider: github
   owner: spinettech
   repo: franciscan-records-system
+  releaseType: release
+  vPrefixedTagName: true
