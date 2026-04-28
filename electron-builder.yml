@@ -1,0 +1,33 @@
+appId: com.franciscan.records
+productName: Franciscan Records System
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - out/**/*
+  - public/**/*
+  - package.json
+  - "node_modules/@prisma/client/**/*"
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/logo.jpg
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  shortcutName: Franciscan Records
+  createDesktopShortcut: true
+asar: true
+asarUnpack:
+  - "node_modules/better-sqlite3/build/**/*"
+extraResources:
+  - from: node_modules/prisma-generated
+    to: node_modules/prisma-generated
+  - from: prisma/dev.db
+    to: prisma/dev.db
+publish:
+  provider: github
+  owner: YOUR_GITHUB_USERNAME
+  repo: YOUR_REPOSITORY_NAME

@@ -1,0 +1,207 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/prisma-generated"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Sister {
+  id                String       @id @default(uuid())
+  fullName          String
+  religiousName     String?
+  region            String?      // St Francis Region Abeoluta, Immaculate Conception Asaba, etc.
+  passportPhoto     String?      // Path to image file
+  dateOfBirth       DateTime?
+  nationality       String?
+  originState       String?
+  firstProfession   DateTime?
+  finalVows        DateTime?
+  status            String       @default("active") // active, retired, deceased, transferred, mission
+  currentCommunity  String?
+  currentRole       String?
+  phone             String?
+  email             String?
+  emergencyContact  String?
+  emergencyContactAddress String?
+  healthNotes       String?      // Optional access-controlled
+  bloodGroup        String?
+  nextOfKinName     String?
+  nextOfKinRelationship String?
+  nextOfKinPhone    String?
+  nextOfKinEmail    String?
+  nextOfKinAddress  String?
+  homeAddress       String?
+  baptismDetails    String?
+  education         String?      // Markdown or JSON string for background
+  skills            String?
+  certifications    String?
+  languages         String?
+  notes             String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  familyMembers     FamilyMember[]
+  Obediences        Obedience[]
+  correspondence    Correspondence[]
+  documents         Document[]
+  leadership        Leadership[]
+}
+
+model Document {
+  id              String    @id @default(uuid())
+  sisterId        String?
+  sister          Sister?   @relation(fields: [sisterId], references: [id], onDelete: Cascade)
+  reportId        String?
+  report          CommunityReport? @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  title           String
+  fileName        String
+  filePath        String
+  fileType        String?
+  fileSize        Int?
+  category        String?   // ID Card, Certificate, Medical, Passport, etc.
+  uploadedAt      DateTime  @default(now())
+}
+
+model FamilyMember {
+  id              String    @id @default(uuid())
+  sisterId        String
+  sister          Sister    @relation(fields: [sisterId], references: [id])
+  name            String
+  relationship    String    // Parent, Sibling, Guardian, etc.
+  phone           String?
+  whatsapp        String?
+  address         String?
+  isEmergency     Boolean   @default(false)
+  isNextOfKin     Boolean   @default(false)
+  isDeceased      Boolean   @default(false)
+  notes           String?
+  createdAt       DateTime  @default(now())
+}
+
+model Obedience {
+  id               String    @id @default(uuid())
+  sisterId         String
+  sister           Sister    @relation(fields: [sisterId], references: [id])
+  communityName    String
+  diocese          String?
+  parish           String?
+  institution      String?
+  country          String?
+  city             String?
+  startDate        DateTime?
+  endDate          DateTime?
+  officeHeld       String?
+  ministryType     String?
+  achievements     String?
+  remarks          String?
+  createdAt        DateTime  @default(now())
+}
+
+model Correspondence {
+  id              String    @id @default(uuid())
+  sisterId        String
+  sister          Sister    @relation(fields: [sisterId], references: [id])
+  type            String    // Letter, Circular, Appointment, Transfer, Promotion, Health, Mission
+  direction       String    // Sent, Received
+  subject         String
+  sender          String?
+  recipient       String?
+  date            DateTime?
+  filePath        String?   // Path to PDF/Docx
+  status          String    @default("pending") // pending, followed-up
+  notes           String?
+  createdAt       DateTime  @default(now())
+}
+
+model Community {
+  id              String    @id @default(uuid())
+  name            String
+  location        String?
+  diocese         String?
+  superiorName    String?
+  contactPhone    String?
+  capacity        Int?
+  apostolateType  String?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  
+  reports         CommunityReport[]
+}
+
+model CommunityReport {
+  id              String    @id @default(uuid())
+  communityId     String
+  community       Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  title           String
+  status          String    // Draft, Submitted, Approved, Archived
+  folderDate      DateTime  // Date the folder/report was created
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  documents       Document[]
+}
+
+model User {
+  id              String    @id @default(uuid())
+  username        String    @unique
+  passwordHash    String
+  role            String    @default("secretary") // admin, secretary, superior
+  fullName        String?
+  email           String?
+  createdAt       DateTime  @default(now())
+}
+
+model Notification {
+  id              String    @id @default(uuid())
+  title           String
+  message         String
+  type            String    // birthday, jubilee, document, obedience, health
+  date            DateTime
+  isRead          Boolean   @default(false)
+  sisterId        String?
+  createdAt       DateTime  @default(now())
+}
+
+model AuditLog {
+  id              String    @id @default(uuid())
+  userId          String
+  action          String
+  entity          String
+  entityId        String?
+  details         String?
+  timestamp       DateTime  @default(now())
+}
+
+model Leadership {
+  id              String    @id @default(uuid())
+  sisterId        String?
+  sister          Sister?   @relation(fields: [sisterId], references: [id])
+  title           String    // Provincial Superior, Provincial Secretary, etc.
+  name            String?   // Fallback if not linked to a sister record
+  termStart       DateTime?
+  termEnd         DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Transaction {
+  id              String    @id @default(uuid())
+  type            String    // income, expenditure
+  category        String    // donation, grant, maintenance, healthcare, travel, food, etc.
+  amount          Float
+  date            DateTime
+  description     String?
+  reference       String?   // receipt number, invoice, etc.
+  paymentMethod   String?   // cash, bank transfer, check
+  recordedBy      String?   // user ID who recorded it
+  communityId     String?   // Optional: link to a community
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}

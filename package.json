@@ -1,0 +1,40 @@
+{
+  "name": "franciscan-records-system",
+  "version": "1.0.0",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "prisma generate && electron-vite build",
+    "build:win": "npm run build && electron-builder --win",
+    "preview": "electron-vite preview"
+  },
+  "dependencies": {
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
+    "@hookform/resolvers": "^5.2.2",
+    "@prisma/client": "^5.11.0",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.8.0",
+    "electron-updater": "^6.1.7",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "lucide-react": "^0.363.0",
+    "react-hook-form": "^7.73.1",
+    "xlsx": "^0.18.5",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.7.0",
+    "electron": "^29.1.5",
+    "electron-builder": "^26.8.1",
+    "electron-vite": "^2.1.0",
+    "prisma": "^5.11.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.4.2",
+    "vite": "^5.1.6"
+  }
+}
