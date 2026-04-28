@@ -33,10 +33,23 @@ const APOSTOLATES = [
 const CommunityForm = ({ community, onBack, onSave }: any) => {
   const [loading, setLoading] = useState(false);
   const [sisters, setSisters] = useState<any[]>([]);
+  const [dynamicApostolates, setDynamicApostolates] = useState<any[]>([]);
 
   useEffect(() => {
     // @ts-ignore
     window.api.getSisters().then(setSisters).catch(console.error);
+    // @ts-ignore
+    window.api.getApostolates().then(data => {
+      if (data && data.length > 0) {
+        setDynamicApostolates(data.map((ap: any) => ({
+          id: ap.name,
+          icon: Briefcase,
+          color: '#64748b'
+        })));
+      } else {
+        setDynamicApostolates(APOSTOLATES);
+      }
+    }).catch(console.error);
   }, []);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<CommunityFormData>({
     resolver: zodResolver(communitySchema),
@@ -137,7 +150,7 @@ const CommunityForm = ({ community, onBack, onSave }: any) => {
               gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', 
               gap: '1rem'
             }}>
-              {APOSTOLATES.map(ap => {
+              {dynamicApostolates.map(ap => {
                 const Icon = ap.icon;
                 const isSelected = watch('apostolateType')?.includes(ap.id);
                 return (

@@ -365,16 +365,31 @@ function createWindow(): void {
 }
 
 // --- UPDATER IPC ---
-ipcMain.handle('check-for-updates', () => {
-  autoUpdater.checkForUpdates();
+ipcMain.handle('check-for-updates', async () => {
+  try {
+    return await autoUpdater.checkForUpdates();
+  } catch (error: any) {
+    console.error('[Updater] Error checking for updates:', error);
+    throw error;
+  }
 });
 
-ipcMain.handle('download-update', () => {
-  autoUpdater.downloadUpdate();
+ipcMain.handle('download-update', async () => {
+  try {
+    return await autoUpdater.downloadUpdate();
+  } catch (error: any) {
+    console.error('[Updater] Error downloading update:', error);
+    throw error;
+  }
 });
 
 ipcMain.handle('quit-and-install', () => {
-  autoUpdater.quitAndInstall();
+  try {
+    autoUpdater.quitAndInstall();
+  } catch (error: any) {
+    console.error('[Updater] Error during quit and install:', error);
+    throw error;
+  }
 });
 
 // --- AUTH HANDLERS ---
@@ -846,6 +861,8 @@ ipcMain.handle('get-dashboard-stats', async () => {
   const active = await prisma.sister.count({ where: { status: 'Active' } })
   const mission = await prisma.sister.count({ where: { status: 'on Mission' } })
   const exclaustration = await prisma.sister.count({ where: { status: 'Exclaustration' } })
+  const deceased = await prisma.sister.count({ where: { status: 'Deceased' } })
+  const dismissed = await prisma.sister.count({ where: { status: 'Dismissed' } })
   
   // Profession Stats based strictly on finalVows field
   const finallyProfessed = await prisma.sister.count({
@@ -868,7 +885,9 @@ ipcMain.handle('get-dashboard-stats', async () => {
     total, 
     active, 
     mission, 
-    exclaustration, 
+    exclaustration,
+    deceased,
+    dismissed,
     finallyProfessed, 
     notFinallyProfessed, 
     recentSisters 
@@ -1206,12 +1225,94 @@ ipcMain.handle('open-document', async (_, fileName: string) => {
   return await shell.openPath(fullPath)
 })
 
+ipcMain.handle('global-search', async (_, query: string) => {
+  try {
+    if (!query || query.length < 2) return { sisters: [], communities: [], documents: [] }
+
+    const [sisters, communities, documents] = await Promise.all([
+      prisma.sister.findMany({
+        where: {
+          OR: [
+            { fullName: { contains: query } },
+            { religiousName: { contains: query } }
+          ]
+        },
+        take: 5,
+        select: { id: true, fullName: true, religiousName: true, passportPhoto: true }
+      }),
+      prisma.community.findMany({
+        where: { name: { contains: query } },
+        take: 5,
+        select: { id: true, name: true, location: true }
+      }),
+      prisma.document.findMany({
+        where: { title: { contains: query } },
+        take: 5,
+        include: { 
+          sister: { select: { fullName: true, religiousName: true } },
+          report: { select: { title: true } }
+        }
+      })
+    ])
+
+    // Format the results to include consistent subtitles and navigation data
+    const formattedDocuments = documents.map((d: any) => ({
+      id: d.id,
+      title: d.title,
+      fileName: d.fileName,
+      category: d.category,
+      sisterId: d.sisterId,
+      reportId: d.reportId,
+      subtitle: d.sister ? (d.sister.religiousName || d.sister.fullName) : (d.report ? d.report.title : d.category)
+    }))
+
+    return { sisters, communities, documents: formattedDocuments }
+  } catch (error) {
+    console.error('[IPC:global-search] Error:', error)
+    return { sisters: [], communities: [], documents: [] }
+  }
+})
+ipcMain.handle('get-apostolates', async () => {
+  return await prisma.apostolate.findMany({ orderBy: { name: 'asc' } })
+})
+
+ipcMain.handle('upsert-apostolate', async (_, id: string | null, name: string) => {
+  if (id) {
+    return await prisma.apostolate.update({ where: { id }, data: { name } })
+  }
+  return await prisma.apostolate.create({ data: { name } })
+})
+
+ipcMain.handle('delete-apostolate', async (_, id: string) => {
+  return await prisma.apostolate.delete({ where: { id } })
+})
+
+async function seedApostolates() {
+  console.log('[Init] Checking for default apostolates...')
+  const defaults = [
+    'Education', 'Healthcare', 'Social Services', 'Pastoral', 
+    'Missions', 'Administration', 'Formation', 'Hospitality'
+  ]
+  try {
+    const count = await prisma.apostolate.count()
+    if (count === 0) {
+      console.log('[Init] Seeding default apostolates...')
+      for (const name of defaults) {
+        await prisma.apostolate.create({ data: { name } })
+      }
+    }
+  } catch (err) {
+    console.error('[Init] Error seeding apostolates:', err)
+  }
+}
+
 app.whenReady().then(async () => {
   // Set app user model id for windows notifications
   electronApp.setAppUserModelId('com.franciscan.records')
 
   // Seed default admin user if not exists
   await seedAdmin()
+  await seedApostolates()
 
   // Ensure database schema is up to date (Production migration)
   ensureSchemaUpdated()

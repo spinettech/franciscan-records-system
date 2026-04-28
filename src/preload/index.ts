@@ -58,6 +58,14 @@ const api = {
   upsertLeadership: (id: string | undefined, data: any) => ipcRenderer.invoke('upsert-leadership', { id, data }),
   deleteLeadership: (id: string) => ipcRenderer.invoke('delete-leadership', id),
 
+  // Global Search
+  globalSearch: (query: string) => ipcRenderer.invoke('global-search', query),
+
+  // Apostolates
+  getApostolates: () => ipcRenderer.invoke('get-apostolates'),
+  upsertApostolate: (id: string | null, name: string) => ipcRenderer.invoke('upsert-apostolate', id, name),
+  deleteApostolate: (id: string) => ipcRenderer.invoke('delete-apostolate', id),
+
   // Updater
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
   quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),

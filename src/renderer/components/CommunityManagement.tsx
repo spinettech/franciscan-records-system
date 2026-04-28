@@ -5,7 +5,7 @@ import CommunityCard from './CommunityManagement/CommunityCard';
 import CommunityForm from './CommunityManagement/CommunityForm';
 import CommunityInfoView from './CommunityManagement/CommunityInfoView';
 
-const CommunityManagement = () => {
+const CommunityManagement = ({ preSelectedId = null, onModeReset }: { preSelectedId?: string | null, onModeReset?: () => void }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingCommunity, setEditingCommunity] = useState<any>(null);
   const [viewingCommunity, setViewingCommunity] = useState<any>(null);
@@ -18,6 +18,11 @@ const CommunityManagement = () => {
       // @ts-ignore
       const data = await window.api.getCommunities();
       setCommunities(data);
+      
+      if (preSelectedId) {
+        const found = data.find((c: any) => c.id === preSelectedId);
+        if (found) setViewingCommunity(found);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -27,7 +32,7 @@ const CommunityManagement = () => {
 
   useEffect(() => {
     fetchCommunities();
-  }, []);
+  }, [preSelectedId]);
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this community record? This cannot be undone.')) {

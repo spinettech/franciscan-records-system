@@ -11,7 +11,10 @@ import {
   Palette,
   CloudLightning,
   ChevronRight,
-  Server
+  Server,
+  Briefcase,
+  Trash2,
+  Plus
 } from 'lucide-react'
 import { showToast } from '../../utils/toast'
 
@@ -25,13 +28,61 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
   const [passwords, setPasswords] = useState({ old: '', new: '', confirm: '' })
   const [loading, setLoading] = useState(false)
   const [updateStatus, setUpdateStatus] = useState<any>({ status: 'idle', message: 'System is ready.' })
+  const [apostolates, setApostolates] = useState<any[]>([])
+  const [newApostolate, setNewApostolate] = useState('')
 
   useEffect(() => {
     // @ts-ignore
     window.api.onUpdateStatus((data: any) => {
       setUpdateStatus(data)
+      if (data.status === 'error') {
+        showToast('error', 'Update Error', data.message || 'Failed to check for updates.')
+      } else if (data.status === 'downloaded') {
+        showToast('success', 'Update Ready', 'A new version has been downloaded and is ready to install.')
+      }
     })
+
+    fetchApostolates()
   }, [])
+
+  const fetchApostolates = async () => {
+    try {
+      // @ts-ignore
+      const data = await window.api.getApostolates()
+      setApostolates(data || [])
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleAddApostolate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newApostolate.trim()) return
+    setLoading(true)
+    try {
+      // @ts-ignore
+      await window.api.upsertApostolate(null, newApostolate.trim())
+      setNewApostolate('')
+      fetchApostolates()
+      showToast('success', 'Apostolate Added', 'The new category has been added to the registry.')
+    } catch (err: any) {
+      showToast('error', 'Action Failed', err.message || 'Could not add apostolate.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteApostolate = async (id: string) => {
+    if (!confirm('Permanently remove this apostolate type? This will not affect existing records but will remove it from future selections.')) return
+    try {
+      // @ts-ignore
+      await window.api.deleteApostolate(id)
+      fetchApostolates()
+      showToast('success', 'Apostolate Removed', 'The category has been deleted.')
+    } catch (err: any) {
+      showToast('error', 'Delete Failed', err.message)
+    }
+  }
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -84,6 +135,7 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
   const tabs = [
     { id: 'profile', label: 'My Profile', desc: 'Personal details', icon: User },
     { id: 'security', label: 'Security', desc: 'Password & access', icon: Lock },
+    { id: 'apostolates', label: 'Apostolates', desc: 'Ministry categories', icon: Briefcase },
     { id: 'preferences', label: 'Preferences', desc: 'App appearance', icon: Palette },
     { id: 'database', label: 'Data & Backup', desc: 'Storage management', icon: Server },
     { id: 'updates', label: 'System Updates', desc: 'Software versions', icon: CloudLightning },
@@ -275,6 +327,61 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
             </div>
           )}
 
+          {activeTab === 'apostolates' && (
+            <div className="animate-fade-in">
+              <div className="flex items-center gap-4 mb-10 pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
+                <div style={{ padding: '1rem', background: 'rgba(var(--primary-rgb), 0.05)', borderRadius: '16px', color: 'var(--primary)' }}>
+                  <Briefcase size={32} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 900, color: 'var(--primary)' }}>Ministry & Apostolates</h3>
+                  <p className="text-muted" style={{ margin: '0.25rem 0 0 0' }}>Manage the list of apostolate types used across the system.</p>
+                </div>
+              </div>
+
+              <div style={{ maxWidth: '800px' }}>
+                <form onSubmit={handleAddApostolate} className="glass-panel" style={{ padding: '2rem', marginBottom: '2.5rem', background: 'rgba(var(--primary-rgb), 0.02)', border: '1px dashed var(--border)' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Add New Apostolate Type</label>
+                  <div className="flex gap-3 mt-3">
+                    <input 
+                      style={{ flex: 1, padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'white' }}
+                      value={newApostolate}
+                      onChange={e => setNewApostolate(e.target.value)}
+                      placeholder="e.g. Education, Health Care, Social Work..."
+                    />
+                    <button type="submit" className="btn btn-primary ripple" style={{ borderRadius: '12px', padding: '0 2rem' }} disabled={loading}>
+                      <Plus size={18} /> Add Category
+                    </button>
+                  </div>
+                </form>
+
+                <div className="grid gap-3">
+                  {apostolates.length === 0 ? (
+                    <div style={{ padding: '3rem', textAlign: 'center', border: '1px dashed var(--border)', borderRadius: '20px', color: 'var(--text-muted)' }}>
+                      No apostolates defined. Use the form above to add one.
+                    </div>
+                  ) : apostolates.map(ap => (
+                    <div key={ap.id} className="flex items-center justify-between p-4" style={{ background: 'white', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+                      <div className="flex items-center gap-3">
+                        <div style={{ width: 40, height: 40, borderRadius: '10px', background: 'rgba(var(--primary-rgb), 0.05)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Briefcase size={18} />
+                        </div>
+                        <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary)' }}>{ap.name}</span>
+                      </div>
+                      <button 
+                        className="icon-btn text-danger ripple" 
+                        onClick={() => handleDeleteApostolate(ap.id)}
+                        style={{ background: 'rgba(239, 68, 68, 0.05)', width: '38px', height: '38px' }}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'preferences' && (
             <div className="animate-fade-in">
               <div className="flex items-center gap-4 mb-10 pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
@@ -363,42 +470,132 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 900, color: 'var(--primary)' }}>System Updates</h3>
-                  <p className="text-muted" style={{ margin: '0.25rem 0 0 0' }}>Keep your application updated with the newest features.</p>
+                  <p className="text-muted" style={{ margin: '0.25rem 0 0 0' }}>Maintain peak performance with the latest software patches.</p>
                 </div>
               </div>
 
-              <div className="flex flex-col items-center justify-center py-16 text-center" style={{ background: 'linear-gradient(135deg, #f8fafc, white)', borderRadius: '24px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.02)' }}>
-                <div style={{
-                  width: '96px',
-                  height: '96px',
-                  borderRadius: '28px',
-                  background: 'linear-gradient(135deg, var(--primary), #4f46e5)',
-                  display: 'flex',
-                  alignItems: 'center',
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2.5rem' }}>
+                {/* Left Side: Status Card */}
+                <div className="glass-panel" style={{ 
+                  padding: '3rem', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
                   justifyContent: 'center',
-                  color: 'white',
-                  boxShadow: '0 12px 24px rgba(var(--primary-rgb), 0.3)',
-                  marginBottom: '2rem'
+                  textAlign: 'center',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.8), rgba(248,250,252,0.5))',
+                  border: '1px solid var(--border)',
+                  minHeight: '450px'
                 }}>
-                  <RefreshCw size={48} className={updateStatus.status === 'checking' || updateStatus.status === 'downloading' ? 'animate-spin' : ''} />
+                  <div style={{
+                    width: '120px',
+                    height: '120px',
+                    borderRadius: '35px',
+                    background: updateStatus.status === 'error' 
+                      ? 'linear-gradient(135deg, #ef4444, #b91c1c)' 
+                      : (updateStatus.status === 'downloaded' ? 'linear-gradient(135deg, #10b981, #047857)' : 'linear-gradient(135deg, var(--primary), #6366f1)'),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    boxShadow: updateStatus.status === 'error' 
+                      ? '0 20px 40px rgba(239, 68, 68, 0.25)' 
+                      : (updateStatus.status === 'downloaded' ? '0 20px 40px rgba(16, 185, 129, 0.25)' : '0 20px 40px rgba(var(--primary-rgb), 0.25)'),
+                    marginBottom: '2.5rem',
+                    position: 'relative'
+                  }}>
+                    <RefreshCw size={56} className={updateStatus.status === 'checking' || updateStatus.status === 'downloading' ? 'animate-spin' : ''} />
+                    {updateStatus.status === 'downloaded' && (
+                      <div style={{ position: 'absolute', top: -10, right: -10, background: '#10b981', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 900, border: '4px solid white' }}>READY</div>
+                    )}
+                  </div>
+
+                  <h4 style={{ 
+                    fontSize: '1.75rem', 
+                    fontWeight: 900, 
+                    marginBottom: '0.75rem', 
+                    color: updateStatus.status === 'error' ? '#ef4444' : 'var(--primary)',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    {updateStatus.message}
+                  </h4>
+                  
+                  <div className="flex flex-col items-center gap-2 mb-10">
+                    <div style={{ padding: '0.5rem 1.25rem', background: '#f1f5f9', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                      Current Version: <span style={{ color: 'var(--primary)' }}>v1.0.0</span>
+                    </div>
+                    {updateStatus.status === 'downloading' && (
+                      <div style={{ width: '100%', maxWidth: '280px', marginTop: '1rem' }}>
+                        <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ 
+                            height: '100%', 
+                            width: `${updateStatus.progress?.percent || 0}%`, 
+                            background: 'var(--accent)',
+                            transition: 'width 0.3s ease'
+                          }} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'between', marginTop: '0.5rem', fontSize: '0.75rem', fontWeight: 800, color: 'var(--accent)' }}>
+                          <span>DOWNLOADING...</span>
+                          <span style={{ marginLeft: 'auto' }}>{Math.round(updateStatus.progress?.percent || 0)}%</span>
+                        </div>
+                      </div>
+                    )}
+                    {updateStatus.status === 'error' && updateStatus.error && (
+                      <div style={{ maxWidth: '300px', marginTop: '1rem', padding: '0.75rem', background: '#fef2f2', borderRadius: '12px', border: '1px solid #fee2e2', color: '#b91c1c', fontSize: '0.8rem', fontWeight: 600 }}>
+                        {updateStatus.error}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="w-full flex gap-4 justify-center">
+                    {updateStatus.status === 'downloaded' ? (
+                      <button className="btn btn-primary ripple" onClick={handleRestart} style={{ padding: '1.25rem 3rem', borderRadius: '20px', fontSize: '1.05rem', fontWeight: 900, width: '100%', boxShadow: '0 10px 20px rgba(var(--primary-rgb), 0.2)' }}>
+                        Install Update & Restart
+                      </button>
+                    ) : (
+                      <button className="btn btn-primary ripple" onClick={handleCheckUpdates} disabled={updateStatus.status === 'checking' || updateStatus.status === 'downloading'} style={{ padding: '1.25rem 3rem', borderRadius: '20px', fontSize: '1.05rem', fontWeight: 900, width: '100%', boxShadow: '0 10px 20px rgba(var(--primary-rgb), 0.2)' }}>
+                        {updateStatus.status === 'checking' ? 'Establishing Connection...' : 'Check for System Updates'}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <h4 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', color: 'var(--primary)' }}>{updateStatus.message}</h4>
-                <p className="text-muted mb-8" style={{ maxWidth: '400px', fontSize: '1.1rem', fontWeight: 500 }}>
-                  Franciscan System Version: <strong style={{ color: 'var(--text-main)' }}>v1.0.0</strong><br />
-                  {updateStatus.status === 'downloading' && <span style={{ color: 'var(--accent)' }}>Download Progress: {Math.round(updateStatus.progress?.percent || 0)}%</span>}
-                </p>
+                {/* Right Side: Release Notes / History */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div className="glass-panel" style={{ padding: '2rem', flex: 1, border: '1px solid var(--border)' }}>
+                    <h5 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)' }}>
+                      <RefreshCw size={20} className="text-accent" /> Recent Version History
+                    </h5>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {[
+                        { version: 'v1.0.0', date: 'Initial Release', note: 'Standard deployment of the FSIC Records System.' },
+                        { version: 'v0.9.8', date: 'Beta Stable', note: 'Added Sister Profiles and Basic Financial Tracking.' },
+                        { version: 'v0.9.5', date: 'Core Alpha', note: 'Database architecture and schema optimization.' }
+                      ].map((v, i) => (
+                        <div key={i} style={{ padding: '1rem', background: i === 0 ? 'rgba(var(--primary-rgb), 0.03)' : 'transparent', borderRadius: '16px', border: i === 0 ? '1px solid rgba(var(--primary-rgb), 0.1)' : '1px dashed var(--border)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                            <span style={{ fontSize: '0.95rem', fontWeight: 900, color: i === 0 ? 'var(--primary)' : 'var(--text-main)' }}>{v.version}</span>
+                            <span style={{ marginLeft: 'auto', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{v.date}</span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{v.note}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
-                <div className="flex gap-4">
-                  {updateStatus.status === 'downloaded' ? (
-                    <button className="btn btn-primary ripple" onClick={handleRestart} style={{ padding: '1.25rem 3rem', borderRadius: '16px', fontSize: '1.1rem', boxShadow: '0 8px 16px rgba(var(--primary-rgb), 0.3)' }}>
-                      Restart & Install Update Now
-                    </button>
-                  ) : (
-                    <button className="btn btn-primary ripple" onClick={handleCheckUpdates} disabled={updateStatus.status === 'checking' || updateStatus.status === 'downloading'} style={{ padding: '1.25rem 3rem', borderRadius: '16px', fontSize: '1.1rem', boxShadow: '0 8px 16px rgba(var(--primary-rgb), 0.3)' }}>
-                      {updateStatus.status === 'checking' ? 'Connecting to Server...' : 'Check for Latest Updates'}
-                    </button>
-                  )}
+                  <div className="glass-panel" style={{ padding: '1.5rem 2rem', border: '1px solid var(--border)', background: 'linear-gradient(to right, #fff7ed, white)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <ShieldCheck size={24} style={{ color: 'var(--accent)' }} />
+                      <div>
+                        <h6 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 900, color: 'var(--primary)' }}>Auto-Update Status</h6>
+                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Automatic background checks are active.</p>
+                      </div>
+                      <div style={{ marginLeft: 'auto', width: '40px', height: '22px', background: 'var(--accent)', borderRadius: '11px', position: 'relative' }}>
+                        <div style={{ position: 'absolute', top: 3, right: 3, width: 16, height: 16, background: 'white', borderRadius: '50%' }} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

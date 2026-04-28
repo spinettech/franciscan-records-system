@@ -6,7 +6,7 @@ import SisterProfileView from './SisterDirectory/SisterProfileView';
 import SisterTable from './SisterDirectory/SisterTable';
 import { ObedienceForm } from './Obedience/ObedienceTimeline';
 
-const SisterDirectory = ({ initialAddMode = false, onModeReset }: { initialAddMode?: boolean, onModeReset?: () => void }) => {
+const SisterDirectory = ({ initialAddMode = false, preSelectedId = null, onModeReset }: { initialAddMode?: boolean, preSelectedId?: string | null, onModeReset?: () => void }) => {
   const [isAdding, setIsAdding] = useState(initialAddMode);
   const [selectedSister, setSelectedSister] = useState<any>(null);
   const [isAddingObedienceTo, setIsAddingObedienceTo] = useState<any>(null);
@@ -23,6 +23,13 @@ const SisterDirectory = ({ initialAddMode = false, onModeReset }: { initialAddMo
     // @ts-ignore
     window.api.getCommunities().then(setCommunities).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    if (preSelectedId) {
+      // @ts-ignore
+      window.api.getSister(preSelectedId).then(setSelectedSister).catch(console.error);
+    }
+  }, [preSelectedId]);
 
   const fetchSisters = async () => {
     setLoading(true);

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Users, Mail, MapPin, ArrowRightLeft, Heart, Plus, ChevronRight, Bell, Calendar, Award, BookOpen } from 'lucide-react'
+import { Users, Mail, MapPin, ArrowRightLeft, Heart, Plus, ChevronRight, Bell, Calendar, Award, BookOpen, Skull, UserMinus } from 'lucide-react'
 
 const Dashboard = ({ stats, notifications, user, onAddSister, onAddCircular, onViewObediences }: any) => (
   <div className="animate-fade-in">
@@ -62,6 +62,30 @@ const Dashboard = ({ stats, notifications, user, onAddSister, onAddCircular, onV
           </div>
         </div>
         <div className="stat-trend warning">On Leave of Absence</div>
+      </div>
+      <div className="stat-card">
+        <div className="flex justify-between items-start">
+          <div>
+            <div className="stat-label">Deceased</div>
+            <div className="stat-value">{stats.deceased}</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem', background: 'rgba(100, 116, 139, 0.1)', borderRadius: '12px', color: '#64748b', height: 'fit-content' }}>
+            <Skull size={24} />
+          </div>
+        </div>
+        <div className="stat-trend text-muted">Eternal Rest</div>
+      </div>
+      <div className="stat-card">
+        <div className="flex justify-between items-start">
+          <div>
+            <div className="stat-label">Dismissed</div>
+            <div className="stat-value">{stats.dismissed}</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', color: 'var(--danger)', height: 'fit-content' }}>
+            <UserMinus size={24} />
+          </div>
+        </div>
+        <div className="stat-trend danger">Exit Records</div>
       </div>
       <div className="stat-card">
         <div className="flex justify-between items-start">

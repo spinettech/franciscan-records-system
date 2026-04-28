@@ -18,8 +18,9 @@ const SisterTable: React.FC<SisterTableProps> = ({ sisters, loading, onView, onE
     <table className="modern-table">
       <thead>
         <tr>
-          <th>Official Name</th>
+          <th style={{ width: '80px' }}>Photo</th>
           <th>Religious Name</th>
+          <th>Official Name</th>
           <th>Current Post</th>
           <th>Status</th>
           <th className="text-center">Actions</th>
@@ -29,17 +30,37 @@ const SisterTable: React.FC<SisterTableProps> = ({ sisters, loading, onView, onE
         {sisters.map((s) => (
           <tr key={s.id}>
             <td>
-              <div className="flex items-center gap-3">
-                <div className="avatar-small" style={s.passportPhoto ? { backgroundImage: `url(${s.passportPhoto})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'transparent' } : {}}>
-                  {s.passportPhoto ? '' : s.fullName?.[0]}
-                </div>
-                <div>
-                  <div className="font-bold">{s.fullName}</div>
-                  <div className="text-xs text-muted">ID: {s.id.slice(0, 8)}</div>
-                </div>
+              <div 
+                className="avatar-small" 
+                style={s.passportPhoto ? { 
+                  backgroundImage: `url("${s.passportPhoto}")`, 
+                  backgroundSize: 'cover', 
+                  backgroundPosition: 'center', 
+                  width: '45px', 
+                  height: '45px',
+                  borderRadius: '10px'
+                } : { 
+                  width: '45px', 
+                  height: '45px',
+                  borderRadius: '10px',
+                  background: 'var(--primary-soft)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  color: 'var(--primary)'
+                }}
+              >
+                {!s.passportPhoto && (s.religiousName?.[0] || s.fullName?.[0])}
               </div>
             </td>
-            <td>{s.religiousName || '—'}</td>
+            <td>
+              <div>
+                <div className="font-bold">{s.religiousName || '—'}</div>
+                <div className="text-xs text-muted">ID: {s.id.slice(0, 8)}</div>
+              </div>
+            </td>
+            <td style={{ fontWeight: 600 }}>{s.fullName}</td>
             <td>{s.currentCommunity || '—'}</td>
             <td>
               <span className={`badge badge-${s.status === 'active' ? 'success' : 'warning'}`}>

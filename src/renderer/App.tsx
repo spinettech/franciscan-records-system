@@ -4,8 +4,8 @@ import {
   Home,
   Mail,
   MapPin,
-  PanelLeftClose,
-  PanelLeftOpen,
+  Menu,
+  ChevronLeft,
   DollarSign,
   ArrowRightLeft,
   Award
@@ -38,6 +38,7 @@ const logoImg = './logo.jpg'
 const App = () => {
   const [user, setUser] = useState<any>(null)
   const [view, setView] = useState('dashboard')
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [stats, setStats] = useState({ total: 0, active: 0, mission: 0, retired: 0 })
   const [notifications, setNotifications] = useState([])
   const [isAddingSister, setIsAddingSister] = useState(false)
@@ -53,8 +54,9 @@ const App = () => {
     }
   }, [user, view])
 
-  const navigateTo = (newView: string) => {
+  const navigateTo = (newView: string, id: string | null = null) => {
     setView(newView)
+    setSelectedId(id)
     setIsAddingSister(false)
     setIsAddingCircular(false)
   }
@@ -71,7 +73,7 @@ const App = () => {
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+          {sidebarCollapsed ? <Menu size={20} /> : <ChevronLeft size={20} />}
         </button>
 
         <div className={`logo-container flex items-center gap-3 mb-10${sidebarCollapsed ? ' logo-collapsed' : ''}`}>
@@ -108,10 +110,10 @@ const App = () => {
               onViewObediences={() => setView('obediences')}
             />
           )}
-          {view === 'directory' && <SisterDirectory initialAddMode={isAddingSister} onModeReset={() => setIsAddingSister(false)} />}
-          {view === 'letters' && <Correspondence initialUploadMode={isAddingCircular} onModeReset={() => setIsAddingCircular(false)} />}
+          {view === 'directory' && <SisterDirectory initialAddMode={isAddingSister} preSelectedId={selectedId} onModeReset={() => { setIsAddingSister(false); setSelectedId(null); }} />}
+          {view === 'letters' && <Correspondence initialUploadMode={isAddingCircular} preSelectedId={selectedId} onModeReset={() => { setIsAddingCircular(false); setSelectedId(null); }} />}
           {view === 'obediences' && <ObedienceManagement />}
-          {view === 'communities' && <CommunityManagement />}
+          {view === 'communities' && <CommunityManagement preSelectedId={selectedId} onModeReset={() => setSelectedId(null)} />}
           {view === 'leadership' && <LeadershipManager />}
           {view === 'finance' && <Finance />}
           {view === 'settings' && <SettingsManager user={user} onUserUpdate={setUser} />}

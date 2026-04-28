@@ -141,28 +141,28 @@ body {
 /* ─── Toggle Button ───────────────────────────────────── */
 .sidebar-toggle {
   position: absolute;
-  top: 1.25rem;
-  right: -14px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.12);
-  background: #1e293b;
-  color: rgba(255,255,255,0.7);
+  top: 1.5rem;
+  right: -16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid var(--accent);
+  background: white;
+  color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: var(--transition);
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .sidebar-toggle:hover {
   background: var(--accent);
-  border-color: var(--accent);
   color: white;
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
 }
 
 /* Make the aside position relative so the toggle button anchors to it */
@@ -1557,4 +1557,74 @@ aside.sidebar {
 @keyframes toast-progress {
   from { width: 100%; }
   to   { width: 0%; }
+}
+
+/* Global Search Results */
+.global-results-dropdown {
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.search-result-item:hover {
+  background: #f8fafc;
+  transform: translateX(4px);
+}
+
+.result-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.result-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.result-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-subtitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Background Helpers for Search */
+.bg-primary-soft { background: rgba(15, 23, 42, 0.05); }
+.bg-accent-soft { background: hsla(24, 90%, 50%, 0.08); }
+.bg-secondary-soft { background: #fffbeb; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
