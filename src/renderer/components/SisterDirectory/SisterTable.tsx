@@ -18,7 +18,7 @@ const SisterTable: React.FC<SisterTableProps> = ({ sisters, loading, onView, onE
     <table className="modern-table">
       <thead>
         <tr>
-          <th>Sister Identification</th>
+          <th>Official Name</th>
           <th>Religious Name</th>
           <th>Current Post</th>
           <th>Status</th>

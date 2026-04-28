@@ -35,8 +35,8 @@ const SisterDirectory = ({ initialAddMode = false, onModeReset }: { initialAddMo
       });
       setSisters(data);
     } catch (err: any) {
-      console.error(err);
-      showToast('error', 'Error', 'Failed to load directory records.');
+      console.error('Fetch Sisters Error:', err);
+      showToast('error', 'Error', `Failed to load directory records: ${err.message || 'Database connection error'}`);
     } finally {
       setLoading(false);
     }

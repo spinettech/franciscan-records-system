@@ -7,7 +7,7 @@ import crypto from 'crypto'
 import fs from 'fs'
 import * as XLSX from 'xlsx'
 import { jsPDF } from 'jspdf'
-// import 'jspdf-autotable'
+import BetterSqlite3 from 'better-sqlite3'
 import { dialog } from 'electron'
 
 // Handle uncaught exceptions in main process
@@ -35,19 +35,27 @@ const DB_PATH = isDev
 // Fix for Prisma in production: point to the unpacked engine
 if (!isDev) {
   const possiblePaths = [
-    join(process.resourcesPath, 'app.asar.unpacked/node_modules/prisma-generated/query_engine-windows.dll.node'),
     join(process.resourcesPath, 'node_modules/prisma-generated/query_engine-windows.dll.node'),
+    join(process.resourcesPath, 'app.asar.unpacked/node_modules/prisma-generated/query_engine-windows.dll.node'),
     join(app.getAppPath(), '../app.asar.unpacked/node_modules/prisma-generated/query_engine-windows.dll.node')
   ]
 
   for (const qePath of possiblePaths) {
     if (fs.existsSync(qePath)) {
       process.env.PRISMA_QUERY_ENGINE_LIBRARY = qePath
-      console.log('[Init] Setting PRISMA_QUERY_ENGINE_LIBRARY to:', qePath)
+      console.log('[Init] Found Prisma Engine at:', qePath)
       break
     }
   }
 }
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: `file:${DB_PATH.replace(/\\/g, '/')}`
+    }
+  }
+})
 
 // If packaged, ensure the database exists in userData
 if (!isDev) {
@@ -64,48 +72,192 @@ if (!isDev) {
   }
 }
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: `file:${DB_PATH}`
-    }
-  }
-})
+// Note: prisma instantiation moved up to ensure env vars are used
 
-// --- SCHEMA MIGRATION HELPER ---
-async function ensureSchemaUpdated() {
-  if (isDev) return;
+// --- SCHEMA MIGRATION HELPER (uses better-sqlite3 directly for reliability) ---
+function ensureSchemaUpdated() {
   try {
-    // 1. Ensure 'region' column exists in Sister table
-    const sisterInfo: any[] = await prisma.$queryRawUnsafe(`PRAGMA table_info(Sister)`);
-    const hasRegion = sisterInfo.some(col => col.name === 'region');
-    if (!hasRegion) {
-      console.log('[Migration] Adding region column to Sister table...');
-      await prisma.$executeRawUnsafe(`ALTER TABLE Sister ADD COLUMN region TEXT`);
-      console.log('[Migration] Sister.region added.');
-    }
+    console.log('[Migration] Opening DB for schema check at:', DB_PATH);
+    const db = new BetterSqlite3(DB_PATH);
 
-    // 2. Ensure Leadership table exists
-    const tables: any[] = await prisma.$queryRawUnsafe(`SELECT name FROM sqlite_master WHERE type='table' AND name='Leadership'`);
-    if (tables.length === 0) {
-      console.log('[Migration] Creating Leadership table...');
-      await prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "Leadership" (
-          "id" TEXT NOT NULL PRIMARY KEY,
-          "sisterId" TEXT,
-          "title" TEXT NOT NULL,
-          "name" TEXT,
-          "termStart" DATETIME,
-          "termEnd" DATETIME,
-          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT "Leadership_sisterId_fkey" FOREIGN KEY ("sisterId") REFERENCES "Sister" ("id") ON DELETE SET NULL ON UPDATE CASCADE
-        )
-      `);
-      console.log('[Migration] Leadership table created.');
-    }
-  } catch (err) {
-    console.error('[Migration] Failed to check/update schema:', err);
+    const addCol = (table: string, col: string, def: string) => {
+      try {
+        const exists = db.prepare(`PRAGMA table_info("${table}")`).all().some((r: any) => r.name === col);
+        if (!exists) {
+          db.prepare(`ALTER TABLE "${table}" ADD COLUMN "${col}" ${def}`).run();
+          console.log(`[Migration] Added ${table}.${col}`);
+        }
+      } catch (e: any) {
+        console.warn(`[Migration] Could not add ${table}.${col}:`, e.message);
+      }
+    };
+
+    const tableExists = (table: string) =>
+      (db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`).get(table) as any)?.name === table;
+
+    const createTable = (table: string, definition: string) => {
+      if (!tableExists(table)) {
+        db.prepare(`CREATE TABLE "${table}" (${definition})`).run();
+        console.log(`[Migration] Created missing table: ${table}`);
+      }
+    };
+
+    // === Ensure all tables exist ===
+    createTable('Obedience', `
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "sisterId" TEXT NOT NULL,
+      "communityName" TEXT,
+      "diocese" TEXT,
+      "parish" TEXT,
+      "institution" TEXT,
+      "country" TEXT,
+      "city" TEXT,
+      "startDate" DATETIME,
+      "endDate" DATETIME,
+      "officeHeld" TEXT,
+      "ministryType" TEXT,
+      "achievements" TEXT,
+      "remarks" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `);
+
+    createTable('FamilyMember', `
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "sisterId" TEXT NOT NULL,
+      "name" TEXT NOT NULL,
+      "relationship" TEXT,
+      "phone" TEXT,
+      "whatsapp" TEXT,
+      "address" TEXT,
+      "isEmergency" INTEGER DEFAULT 0,
+      "isNextOfKin" INTEGER DEFAULT 0,
+      "isDeceased" INTEGER DEFAULT 0,
+      "notes" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `);
+
+    createTable('Correspondence', `
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "sisterId" TEXT NOT NULL,
+      "type" TEXT NOT NULL,
+      "direction" TEXT NOT NULL,
+      "subject" TEXT NOT NULL,
+      "sender" TEXT,
+      "recipient" TEXT,
+      "date" DATETIME,
+      "filePath" TEXT,
+      "status" TEXT DEFAULT 'pending',
+      "notes" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `);
+
+    createTable('Community', `
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "name" TEXT NOT NULL,
+      "location" TEXT,
+      "diocese" TEXT,
+      "superiorName" TEXT,
+      "contactPhone" TEXT,
+      "capacity" INTEGER,
+      "apostolateType" TEXT,
+      "isActive" INTEGER DEFAULT 1,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `);
+
+    createTable('CommunityReport', `
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "communityId" TEXT NOT NULL,
+      "title" TEXT NOT NULL,
+      "status" TEXT NOT NULL,
+      "folderDate" DATETIME NOT NULL,
+      "notes" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `);
+
+    createTable('Document', `
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "sisterId" TEXT,
+      "reportId" TEXT,
+      "title" TEXT NOT NULL,
+      "fileName" TEXT NOT NULL,
+      "filePath" TEXT NOT NULL,
+      "fileType" TEXT,
+      "fileSize" INTEGER,
+      "category" TEXT,
+      "uploadedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `);
+
+    createTable('Notification', `
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "title" TEXT NOT NULL,
+      "message" TEXT NOT NULL,
+      "type" TEXT NOT NULL,
+      "date" DATETIME NOT NULL,
+      "isRead" INTEGER DEFAULT 0,
+      "sisterId" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `);
+
+    createTable('Transaction', `
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "type" TEXT NOT NULL,
+      "category" TEXT NOT NULL,
+      "amount" REAL NOT NULL,
+      "date" DATETIME NOT NULL,
+      "description" TEXT,
+      "reference" TEXT,
+      "paymentMethod" TEXT,
+      "recordedBy" TEXT,
+      "communityId" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `);
+
+    createTable('Leadership', `
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "sisterId" TEXT,
+      "title" TEXT NOT NULL,
+      "name" TEXT,
+      "termStart" DATETIME,
+      "termEnd" DATETIME,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `);
+
+    // === Add missing columns to Sister (Incremental Updates) ===
+    addCol('Sister', 'region', 'TEXT');
+    addCol('Sister', 'religiousName', 'TEXT');
+    addCol('Sister', 'passportPhoto', 'TEXT');
+    addCol('Sister', 'nationality', 'TEXT');
+    addCol('Sister', 'originState', 'TEXT');
+    addCol('Sister', 'firstProfession', 'DATETIME');
+    addCol('Sister', 'finalVows', 'DATETIME');
+    addCol('Sister', 'currentCommunity', 'TEXT');
+    addCol('Sister', 'currentRole', 'TEXT');
+    addCol('Sister', 'phone', 'TEXT');
+    addCol('Sister', 'email', 'TEXT');
+    addCol('Sister', 'emergencyContact', 'TEXT');
+    addCol('Sister', 'emergencyContactAddress', 'TEXT');
+    addCol('Sister', 'healthNotes', 'TEXT');
+    addCol('Sister', 'bloodGroup', 'TEXT');
+    addCol('Sister', 'nextOfKinName', 'TEXT');
+    addCol('Sister', 'nextOfKinRelationship', 'TEXT');
+    addCol('Sister', 'nextOfKinPhone', 'TEXT');
+    addCol('Sister', 'nextOfKinEmail', 'TEXT');
+    addCol('Sister', 'nextOfKinAddress', 'TEXT');
+    addCol('Sister', 'homeAddress', 'TEXT');
+    addCol('Sister', 'baptismDetails', 'TEXT');
+    addCol('Sister', 'education', 'TEXT');
+    addCol('Sister', 'skills', 'TEXT');
+    addCol('Sister', 'certifications', 'TEXT');
+    addCol('Sister', 'languages', 'TEXT');
+    addCol('Sister', 'notes', 'TEXT');
+
+    db.close();
+    console.log('[Migration] Schema check complete.');
+  } catch (err: any) {
+    console.error('[Migration] Critical migration error:', err.message);
   }
 }
 
@@ -295,23 +447,28 @@ ipcMain.handle('change-password', async (_, { id, oldPassword, newPassword }) =>
 
 // --- SISTER HANDLERS ---
 ipcMain.handle('get-sisters', async (_, filters: any = {}) => {
-  const { search, status, community } = filters
-  let where: any = {}
+  try {
+    const { search, status, community } = filters
+    let where: any = {}
 
-  if (search) {
-    where.OR = [
-      { fullName: { contains: search } },
-      { religiousName: { contains: search } }
-    ]
+    if (search) {
+      where.OR = [
+        { fullName: { contains: search } },
+        { religiousName: { contains: search } }
+      ]
+    }
+    if (status) where.status = status
+    if (community) where.currentCommunity = community
+
+    return await prisma.sister.findMany({
+      where,
+      include: { Obediences: true, familyMembers: true },
+      orderBy: { fullName: 'asc' }
+    })
+  } catch (error: any) {
+    console.error('[IPC:get-sisters] Database Error:', error)
+    throw error
   }
-  if (status) where.status = status
-  if (community) where.currentCommunity = community
-
-  return await prisma.sister.findMany({
-    where,
-    include: { Obediences: true, familyMembers: true },
-    orderBy: { fullName: 'asc' }
-  })
 })
 
 ipcMain.handle('get-sister', async (_, id: string) => {
@@ -722,7 +879,7 @@ ipcMain.handle('get-dashboard-stats', async () => {
 ipcMain.handle('get-leadership', async () => {
   return await prisma.leadership.findMany({
     include: { sister: true },
-    orderBy: { rank: 'asc' }
+    orderBy: { createdAt: 'asc' }
   })
 })
 
@@ -1057,7 +1214,7 @@ app.whenReady().then(async () => {
   await seedAdmin()
 
   // Ensure database schema is up to date (Production migration)
-  await ensureSchemaUpdated()
+  ensureSchemaUpdated()
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
