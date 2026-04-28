@@ -29,5 +29,5 @@ extraResources:
     to: prisma/dev.db
 publish:
   provider: github
-  owner: YOUR_GITHUB_USERNAME
-  repo: YOUR_REPOSITORY_NAME
+  owner: spinettech
+  repo: franciscan-records-system

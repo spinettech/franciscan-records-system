@@ -57,8 +57,6 @@ if (!isDev) {
       if (fs.existsSync(seedPath)) {
         fs.copyFileSync(seedPath, DB_PATH)
         console.log('[Init] Database seeded to userData.')
-      } else {
-        console.error('[Init] Seed database not found at:', seedPath)
       }
     } catch (err) {
       console.error('[Init] Failed to seed database:', err)
@@ -73,6 +71,43 @@ const prisma = new PrismaClient({
     }
   }
 })
+
+// --- SCHEMA MIGRATION HELPER ---
+async function ensureSchemaUpdated() {
+  if (isDev) return;
+  try {
+    // 1. Ensure 'region' column exists in Sister table
+    const sisterInfo: any[] = await prisma.$queryRawUnsafe(`PRAGMA table_info(Sister)`);
+    const hasRegion = sisterInfo.some(col => col.name === 'region');
+    if (!hasRegion) {
+      console.log('[Migration] Adding region column to Sister table...');
+      await prisma.$executeRawUnsafe(`ALTER TABLE Sister ADD COLUMN region TEXT`);
+      console.log('[Migration] Sister.region added.');
+    }
+
+    // 2. Ensure Leadership table exists
+    const tables: any[] = await prisma.$queryRawUnsafe(`SELECT name FROM sqlite_master WHERE type='table' AND name='Leadership'`);
+    if (tables.length === 0) {
+      console.log('[Migration] Creating Leadership table...');
+      await prisma.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "Leadership" (
+          "id" TEXT NOT NULL PRIMARY KEY,
+          "sisterId" TEXT,
+          "title" TEXT NOT NULL,
+          "name" TEXT,
+          "termStart" DATETIME,
+          "termEnd" DATETIME,
+          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "Leadership_sisterId_fkey" FOREIGN KEY ("sisterId") REFERENCES "Sister" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+        )
+      `);
+      console.log('[Migration] Leadership table created.');
+    }
+  } catch (err) {
+    console.error('[Migration] Failed to check/update schema:', err);
+  }
+}
 
 // --- CRYPTO UTILS ---
 const HASH_CONFIG = {
@@ -1015,11 +1050,22 @@ ipcMain.handle('open-document', async (_, fileName: string) => {
 })
 
 app.whenReady().then(async () => {
-  await seedAdmin()
+  // Set app user model id for windows notifications
   electronApp.setAppUserModelId('com.franciscan.records')
+
+  // Seed default admin user if not exists
+  await seedAdmin()
+
+  // Ensure database schema is up to date (Production migration)
+  await ensureSchemaUpdated()
+
+  // Default open or close DevTools by F12 in development
+  // and ignore CommandOrControl + R in production.
+  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
+
   createWindow()
 
   app.on('activate', function () {
