@@ -247,7 +247,7 @@ function ensureSchemaUpdated() {
     addCol('Sister', 'nextOfKinEmail', 'TEXT');
     addCol('Sister', 'nextOfKinAddress', 'TEXT');
     addCol('Sister', 'homeAddress', 'TEXT');
-    addCol('Sister', 'baptismDetails', 'TEXT');
+    addCol('Sister', 'feastDay', 'DATETIME');
     addCol('Sister', 'education', 'TEXT');
     addCol('Sister', 'skills', 'TEXT');
     addCol('Sister', 'certifications', 'TEXT');
@@ -966,7 +966,7 @@ ipcMain.handle('export-sisters', async (event, { format }) => {
         'Next of Kin Email': s.nextOfKinEmail || '',
         'Next of Kin Address': s.nextOfKinAddress || '',
         'Home Address': s.homeAddress || '',
-        'Baptism Details': s.baptismDetails || '',
+        'Feast Day': s.feastDay ? s.feastDay.toLocaleDateString() : '',
         'Confirmation Details': s.confirmationDetails || '',
         'Health Notes': s.healthNotes || '',
         'Education': s.education || '',
@@ -1101,7 +1101,7 @@ ipcMain.handle('import-sisters', async (event) => {
           nextOfKinEmail: row['Next of Kin Email'] || row['nextOfKinEmail'],
           nextOfKinAddress: row['Next of Kin Address'] || row['nextOfKinAddress'],
           homeAddress: row['Home Address'] || row['homeAddress'],
-          baptismDetails: row['Baptism Details'] || row['baptismDetails'],
+          feastDay: row['Feast Day'] || row['feastDay'] ? new Date(row['Feast Day'] || row['feastDay']) : null,
           confirmationDetails: row['Confirmation Details'] || row['confirmationDetails'],
           healthNotes: row['Health Notes'] || row['healthNotes'],
           education: row['Education'] || row['education'],

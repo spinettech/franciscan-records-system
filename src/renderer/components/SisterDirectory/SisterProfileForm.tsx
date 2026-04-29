@@ -42,7 +42,7 @@ const sisterSchema = z.object({
   status: z.string().min(1),
   currentCommunity: z.string().optional(),
   currentRole: z.string().optional(),
-  baptismDetails: z.string().optional(),
+  feastDay: z.string().optional(),
   firstProfession: z.string().optional(),
   finalVows: z.string().optional(),
   notes: z.string().optional(),
@@ -67,7 +67,7 @@ type SisterFormData = z.infer<typeof sisterSchema>;
 
 const STEP_FIELDS: (keyof SisterFormData)[][] = [
   ['fullName', 'religiousName', 'region', 'dateOfBirth', 'nationality', 'originState', 'bloodGroup', 'phone', 'email', 'homeAddress'],
-  ['status', 'currentCommunity', 'currentRole', 'baptismDetails', 'firstProfession', 'finalVows', 'notes'],
+  ['status', 'currentCommunity', 'currentRole', 'feastDay', 'firstProfession', 'finalVows', 'notes'],
   ['emergencyContact', 'emergencyContactAddress', 'nextOfKinName', 'nextOfKinRelationship', 'nextOfKinPhone', 'nextOfKinEmail', 'nextOfKinAddress'],
   ['education', 'skills', 'certifications', 'languages', 'healthNotes'],
   ['ObedienceCommunity', 'ObedienceRole', 'ObedienceStartDate'],
@@ -99,7 +99,7 @@ const SisterProfileForm = ({ sister, onBack, onSave }: { sister?: any, onBack: (
       email: sister?.email || '',
       homeAddress: sister?.homeAddress || '',
       status: sister?.status || 'Active',
-      baptismDetails: sister?.baptismDetails || '',
+      feastDay: sister?.feastDay ? new Date(sister.feastDay).toISOString().split('T')[0] : '',
       firstProfession: sister?.firstProfession ? new Date(sister.firstProfession).toISOString().split('T')[0] : '',
       finalVows: sister?.finalVows ? new Date(sister.finalVows).toISOString().split('T')[0] : '',
       currentCommunity: sister?.currentCommunity || '',
@@ -150,6 +150,7 @@ const SisterProfileForm = ({ sister, onBack, onSave }: { sister?: any, onBack: (
         payload.religiousName = name;
       }
       if (payload.dateOfBirth) payload.dateOfBirth = new Date(payload.dateOfBirth); else payload.dateOfBirth = null;
+      if (payload.feastDay) payload.feastDay = new Date(payload.feastDay); else payload.feastDay = null;
       if (payload.firstProfession) payload.firstProfession = new Date(payload.firstProfession); else payload.firstProfession = null;
       if (payload.finalVows) payload.finalVows = new Date(payload.finalVows); else payload.finalVows = null;
       if (photo) payload.passportPhoto = photo;
@@ -315,8 +316,8 @@ const SisterProfileForm = ({ sister, onBack, onSave }: { sister?: any, onBack: (
             <FG label="Current Role / Office">
               <input {...register('currentRole')} placeholder="e.g. Co-ordinator, Member, Nurse" />
             </FG>
-            <FG label="Date of Baptism / Baptism Parish">
-              <input {...register('baptismDetails')} placeholder="Parish name, date, godparents..." />
+            <FG label="Feast Day Date">
+              <input type="date" {...register('feastDay')} />
             </FG>
             <FG label="Date of Temporary Profession">
               <input type="date" {...register('firstProfession')} />

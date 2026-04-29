@@ -37,7 +37,7 @@ model Sister {
   nextOfKinEmail    String?
   nextOfKinAddress  String?
   homeAddress       String?
-  baptismDetails    String?
+  feastDay          DateTime?
   education         String?      // Markdown or JSON string for background
   skills            String?
   certifications    String?

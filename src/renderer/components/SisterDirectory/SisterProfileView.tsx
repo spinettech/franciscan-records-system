@@ -114,7 +114,7 @@ const SisterProfileView: React.FC<SisterProfileViewProps> = ({ sister, onBack, o
               <ProfileField label="Temporary Profession" value={sister.firstProfession ? new Date(sister.firstProfession).toLocaleDateString(undefined, { dateStyle: 'long' }) : '-'} icon={Calendar} />
               <ProfileField label="Perpetual Vows" value={sister.finalVows ? new Date(sister.finalVows).toLocaleDateString(undefined, { dateStyle: 'long' }) : '-'} icon={Award} />
               <div className="col-span-2">
-                <ProfileField label="Baptism Details" value={sister.baptismDetails} icon={Info} />
+                <ProfileField label="Feast Day" value={sister.feastDay ? new Date(sister.feastDay).toLocaleDateString(undefined, { dateStyle: 'long' }) : '-'} icon={Info} />
               </div>
               <div className="col-span-2">
                 <ProfileField label="General Remarks" value={sister.notes} icon={FileText} />
