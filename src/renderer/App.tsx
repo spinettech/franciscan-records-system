@@ -76,14 +76,14 @@ const App = () => {
           {sidebarCollapsed ? <Menu size={20} /> : <ChevronLeft size={20} />}
         </button>
 
-        <div className={`logo-container flex items-center gap-3 mb-10${sidebarCollapsed ? ' logo-collapsed' : ''}`}>
+        <div className={`logo-container flex items-center gap-2 mb-10${sidebarCollapsed ? ' logo-collapsed' : ''}`}>
           <div className="sidebar-brand-logo">
             <img src={logoImg} alt="Logo" className="brand-image" />
           </div>
           {!sidebarCollapsed && (
             <div className="nav-brand-text">
               <h2>FSIC</h2>
-              <span>Sisters Registry</span>
+              <span>Sister&apos;s Registry</span>
             </div>
           )}
         </div>

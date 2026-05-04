@@ -327,6 +327,10 @@ function createWindow(): void {
     }
   })
 
+  // Set default zoom factor to 0.9 (90%) to handle high-DPI scaling better on some systems
+  mainWindow.webContents.setZoomFactor(0.9)
+
+
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
@@ -384,6 +388,12 @@ ipcMain.handle('download-update', async () => {
     console.error('[Updater] Error downloading update:', error);
     throw error;
   }
+});
+
+ipcMain.handle('set-auto-download', async (_, value: boolean) => {
+  autoUpdater.autoDownload = value;
+  console.log(`[Updater] Auto-download set to: ${value}`);
+  return { success: true, autoDownload: autoUpdater.autoDownload };
 });
 
 ipcMain.handle('quit-and-install', () => {

@@ -37,20 +37,20 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
           <div className="login-logo-overlay">
             <img src={logoImg} alt="FSIC Logo" className="login-logo-image" />
           </div>
-        </div>
-        
-        <div style={{ padding: '3rem 2rem 2rem' }}>
-          <div className="logo-section mb-8 text-center">
-            <div className="logo-text" style={{ fontSize: '1.75rem' }}>FSIC</div>
-            <div className="logo-subtext">FRANCISCAN SISTERS OF THE <br/> IMMACULATE CONCEPTION</div>
+          <div className="logo-section absolute-logo text-center">
+            <div className="logo-text">FSIC</div>
+            <div className="logo-subtext">FRANCISCAN SISTERS OF THE <br /> IMMACULATE CONCEPTION</div>
           </div>
+        </div>
+
+        <div style={{ padding: '2rem 2.5rem 1.5rem' }}>
           <form onSubmit={handleSubmit}>
             <div className="form-group mb-4">
               <label>Username</label>
-              <input 
-                type="text" 
-                value={username} 
-                onChange={e => setUsername(e.target.value)} 
+              <input
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
                 placeholder="Secretary Username"
                 required
               />
@@ -58,10 +58,10 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
             <div className="form-group mb-4">
               <label>Password</label>
               <div style={{ position: 'relative' }}>
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  value={password} 
-                  onChange={e => setPassword(e.target.value)} 
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
                   style={{ paddingRight: '2.5rem', width: '100%', boxSizing: 'border-box' }}
@@ -99,7 +99,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
             </button>
           </form>
           <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            FSIC Institutional Records System v1.1.0
+            FSIC Institutional Records System v1.0.2
           </div>
         </div>
       </div>

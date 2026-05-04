@@ -30,6 +30,25 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
   const [updateStatus, setUpdateStatus] = useState<any>({ status: 'idle', message: 'System is ready.' })
   const [apostolates, setApostolates] = useState<any[]>([])
   const [newApostolate, setNewApostolate] = useState('')
+  const [autoUpdate, setAutoUpdate] = useState(false)
+  const [theme, setTheme] = useState('light')
+  const [density, setDensity] = useState('comfortable')
+  const [animations, setAnimations] = useState(true)
+
+  useEffect(() => {
+    // Apply theme
+    document.documentElement.className = theme === 'dark' ? 'theme-dark' : ''
+    
+    // Apply density
+    if (density === 'compact') {
+      document.documentElement.classList.add('density-compact')
+    } else {
+      document.documentElement.classList.remove('density-compact')
+    }
+
+    // Apply animations preference (placeholder for now)
+    document.documentElement.style.setProperty('--transition-speed', animations ? '0.3s' : '0s')
+  }, [theme, density, animations])
 
   useEffect(() => {
     // @ts-ignore
@@ -383,37 +402,132 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
           )}
 
           {activeTab === 'preferences' && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in" style={{ maxWidth: '850px' }}>
               <div className="flex items-center gap-4 mb-10 pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
                 <div style={{ padding: '1rem', background: 'rgba(56, 189, 248, 0.05)', borderRadius: '16px', color: '#0ea5e9' }}>
                   <Palette size={32} />
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 900, color: 'var(--primary)' }}>System Preferences</h3>
-                  <p className="text-muted" style={{ margin: '0.25rem 0 0 0' }}>Personalize your app experience and interface look.</p>
+                  <p className="text-muted" style={{ margin: '0.25rem 0 0 0' }}>Configure your workspace aesthetics and interaction density.</p>
                 </div>
               </div>
 
-              <div className="grid gap-6" style={{ maxWidth: '800px' }}>
-                <div className="flex justify-between items-center p-6" style={{ background: 'white', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                {/* Visual Style Group */}
+                <div className="grid grid-2 gap-12">
                   <div>
-                    <h4 style={{ margin: '0 0 0.25rem 0', fontWeight: 800, fontSize: '1.1rem' }}>Interface Theme</h4>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>Choose your preferred color palette for the application.</p>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '0.5rem', color: 'var(--primary)' }}>Application Theme</h4>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '2rem', fontWeight: 600 }}>Choose a style that suits your working environment.</p>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {[
+                        { id: 'light', label: 'Classic Light', icon: Monitor, desc: 'Clean and bright workspace' },
+                        { id: 'dark', label: 'Midnight Dark', icon: CloudLightning, desc: 'Reduce eye strain in low light' }
+                      ].map(t => (
+                        <button 
+                          key={t.id}
+                          onClick={() => setTheme(t.id)}
+                          className={`ripple ${theme === t.id ? 'active-pref' : ''}`}
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '1.25rem', 
+                            padding: '1.25rem', 
+                            borderRadius: '20px', 
+                            border: theme === t.id ? '2px solid var(--primary)' : '1px solid var(--border)',
+                            background: theme === t.id ? 'rgba(var(--primary-rgb), 0.02)' : 'white',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            transition: 'var(--transition)'
+                          }}
+                        >
+                          <div style={{ padding: '0.75rem', background: theme === t.id ? 'var(--primary)' : '#f1f5f9', color: theme === t.id ? 'white' : 'var(--primary)', borderRadius: '14px' }}>
+                            <t.icon size={20} />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--primary)' }}>{t.label}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{t.desc}</div>
+                          </div>
+                          <div style={{ width: 22, height: 22, borderRadius: '50%', border: '2px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {theme === t.id && <div style={{ width: 10, height: 10, background: 'var(--primary)', borderRadius: '50%' }} />}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex gap-2 p-1" style={{ background: '#f1f5f9', borderRadius: '12px' }}>
-                    <button className="btn btn-sm" style={{ background: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', color: 'var(--primary)', fontWeight: 800, padding: '0.5rem 1rem' }}>Light</button>
-                    <button className="btn btn-sm text-muted" style={{ padding: '0.5rem 1rem', fontWeight: 600 }}>Dark</button>
-                    <button className="btn btn-sm text-muted" style={{ padding: '0.5rem 1rem', fontWeight: 600 }}>System</button>
-                  </div>
-                </div>
 
-                <div className="flex justify-between items-center p-6" style={{ background: 'white', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
-                  <div>
-                    <h4 style={{ margin: '0 0 0.25rem 0', fontWeight: 800, fontSize: '1.1rem' }}>Compact Data Density</h4>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>Show more records on screen by reducing whitespace.</p>
-                  </div>
-                  <div style={{ width: 50, height: 26, background: 'var(--border)', borderRadius: '13px', position: 'relative', cursor: 'pointer' }}>
-                    <div style={{ position: 'absolute', top: 3, left: 3, width: 20, height: 20, background: 'white', borderRadius: '50%', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <section>
+                      <h4 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '0.5rem', color: 'var(--primary)' }}>Information Density</h4>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem', fontWeight: 600 }}>Control the vertical spacing of records.</p>
+                      <div className="flex gap-2 p-1" style={{ background: '#f1f5f9', borderRadius: '16px' }}>
+                        {['comfortable', 'compact'].map(d => (
+                          <button 
+                            key={d}
+                            onClick={() => setDensity(d)}
+                            style={{ 
+                              flex: 1, 
+                              padding: '0.8rem', 
+                              borderRadius: '12px', 
+                              border: 'none',
+                              background: density === d ? 'white' : 'transparent',
+                              boxShadow: density === d ? '0 4px 10px rgba(0,0,0,0.05)' : 'none',
+                              color: density === d ? 'var(--primary)' : 'var(--text-muted)',
+                              fontWeight: 800,
+                              textTransform: 'capitalize',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            {d}
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+
+                    <section>
+                      <h4 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '0.5rem', color: 'var(--primary)' }}>Visual Effects</h4>
+                      <div 
+                        onClick={() => setAnimations(!animations)}
+                        style={{ 
+                          marginTop: '1.5rem', 
+                          padding: '1.25rem', 
+                          background: 'white', 
+                          borderRadius: '20px', 
+                          border: '1px solid var(--border)', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '1rem', 
+                          cursor: 'pointer' 
+                        }}
+                      >
+                        <div style={{ padding: '0.6rem', background: 'rgba(var(--primary-rgb), 0.05)', borderRadius: '10px', color: 'var(--primary)' }}>
+                          <CloudLightning size={18} />
+                        </div>
+                        <span style={{ flex: 1, fontWeight: 800, fontSize: '0.9rem', color: 'var(--primary)' }}>Fluid Transitions</span>
+                        <div style={{ 
+                          width: 44, 
+                          height: 24, 
+                          background: animations ? 'var(--primary)' : '#cbd5e1', 
+                          borderRadius: '12px', 
+                          position: 'relative',
+                          transition: 'background 0.3s ease'
+                        }}>
+                          <div style={{ 
+                            position: 'absolute', 
+                            top: 3, 
+                            left: animations ? 23 : 3, 
+                            width: 18, 
+                            height: 18, 
+                            background: 'white', 
+                            borderRadius: '50%',
+                            transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)' 
+                          }} />
+                        </div>
+                      </div>
+                    </section>
                   </div>
                 </div>
               </div>
@@ -463,7 +577,7 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
           )}
 
           {activeTab === 'updates' && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto' }}>
               <div className="flex items-center gap-4 mb-10 pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
                 <div style={{ padding: '1rem', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '16px', color: '#8b5cf6' }}>
                   <CloudLightning size={32} />
@@ -474,129 +588,166 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2.5rem' }}>
-                {/* Left Side: Status Card */}
-                <div className="glass-panel" style={{ 
-                  padding: '3rem', 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.8), rgba(248,250,252,0.5))',
-                  border: '1px solid var(--border)',
-                  minHeight: '450px'
-                }}>
-                  <div style={{
-                    width: '120px',
-                    height: '120px',
-                    borderRadius: '35px',
-                    background: updateStatus.status === 'error' 
-                      ? 'linear-gradient(135deg, #ef4444, #b91c1c)' 
-                      : (updateStatus.status === 'downloaded' ? 'linear-gradient(135deg, #10b981, #047857)' : 'linear-gradient(135deg, var(--primary), #6366f1)'),
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    boxShadow: updateStatus.status === 'error' 
-                      ? '0 20px 40px rgba(239, 68, 68, 0.25)' 
-                      : (updateStatus.status === 'downloaded' ? '0 20px 40px rgba(16, 185, 129, 0.25)' : '0 20px 40px rgba(var(--primary-rgb), 0.25)'),
-                    marginBottom: '2.5rem',
-                    position: 'relative'
-                  }}>
-                    <RefreshCw size={56} className={updateStatus.status === 'checking' || updateStatus.status === 'downloading' ? 'animate-spin' : ''} />
-                    {updateStatus.status === 'downloaded' && (
-                      <div style={{ position: 'absolute', top: -10, right: -10, background: '#10b981', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 900, border: '4px solid white' }}>READY</div>
-                    )}
-                  </div>
+              <div className="glass-panel" style={{ 
+                padding: '4rem 3rem', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                background: 'linear-gradient(135deg, white, #f8fafc)',
+                border: '1px solid var(--border)',
+                borderRadius: '32px',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                {/* Background Accent */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: updateStatus.status === 'error' ? 'var(--danger)' : (updateStatus.status === 'downloaded' ? 'var(--success)' : 'var(--primary)') }} />
 
+                <div style={{
+                  width: '100px',
+                  height: '100px',
+                  borderRadius: '45px',
+                  background: updateStatus.status === 'error' 
+                    ? 'rgba(239, 68, 68, 0.08)' 
+                    : (updateStatus.status === 'downloaded' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(var(--primary-rgb), 0.05)'),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: updateStatus.status === 'error' ? 'var(--danger)' : (updateStatus.status === 'downloaded' ? 'var(--success)' : 'var(--primary)'),
+                  marginBottom: '2.5rem',
+                  border: '1px solid rgba(0,0,0,0.05)',
+                  position: 'relative'
+                }}>
+                  <RefreshCw size={44} className={updateStatus.status === 'checking' || updateStatus.status === 'downloading' ? 'animate-spin' : ''} />
+                  {updateStatus.status === 'downloaded' && (
+                    <div style={{ position: 'absolute', bottom: -12, background: 'var(--success)', color: 'white', padding: '6px 16px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 900, border: '4px solid white', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)' }}>UPDATE READY</div>
+                  )}
+                </div>
+
+                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                   <h4 style={{ 
-                    fontSize: '1.75rem', 
+                    fontSize: '2rem', 
                     fontWeight: 900, 
                     marginBottom: '0.75rem', 
-                    color: updateStatus.status === 'error' ? '#ef4444' : 'var(--primary)',
-                    letterSpacing: '-0.02em'
+                    color: 'var(--primary)',
+                    letterSpacing: '-0.03em'
                   }}>
                     {updateStatus.message}
                   </h4>
-                  
-                  <div className="flex flex-col items-center gap-2 mb-10">
-                    <div style={{ padding: '0.5rem 1.25rem', background: '#f1f5f9', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                      Current Version: <span style={{ color: 'var(--primary)' }}>v1.0.0</span>
-                    </div>
-                    {updateStatus.status === 'downloading' && (
-                      <div style={{ width: '100%', maxWidth: '280px', marginTop: '1rem' }}>
-                        <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                          <div style={{ 
-                            height: '100%', 
-                            width: `${updateStatus.progress?.percent || 0}%`, 
-                            background: 'var(--accent)',
-                            transition: 'width 0.3s ease'
-                          }} />
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'between', marginTop: '0.5rem', fontSize: '0.75rem', fontWeight: 800, color: 'var(--accent)' }}>
-                          <span>DOWNLOADING...</span>
-                          <span style={{ marginLeft: 'auto' }}>{Math.round(updateStatus.progress?.percent || 0)}%</span>
-                        </div>
-                      </div>
-                    )}
-                    {updateStatus.status === 'error' && updateStatus.error && (
-                      <div style={{ maxWidth: '300px', marginTop: '1rem', padding: '0.75rem', background: '#fef2f2', borderRadius: '12px', border: '1px solid #fee2e2', color: '#b91c1c', fontSize: '0.8rem', fontWeight: 600 }}>
-                        {updateStatus.error}
-                      </div>
-                    )}
+                  <div className="flex items-center justify-center gap-3">
+                    <span style={{ padding: '0.4rem 1rem', background: '#f1f5f9', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+                      Build v1.0.2
+                    </span>
+                    <span style={{ width: '4px', height: '4px', background: '#cbd5e1', borderRadius: '50%' }} />
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                      Released Apr 20, 2026
+                    </span>
                   </div>
+                </div>
 
-                  <div className="w-full flex gap-4 justify-center">
+                <div className="w-full" style={{ maxWidth: '500px' }}>
+                  {updateStatus.status === 'downloading' && (
+                    <div style={{ marginBottom: '2.5rem' }}>
+                      <div style={{ height: '12px', background: '#f1f5f9', borderRadius: '6px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.03)' }}>
+                        <div style={{ 
+                          height: '100%', 
+                          width: `${updateStatus.progress?.percent || 0}%`, 
+                          background: 'linear-gradient(to right, var(--primary), var(--accent))',
+                          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          boxShadow: '0 0 15px rgba(var(--primary-rgb), 0.3)'
+                        }} />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.75rem', fontSize: '0.85rem', fontWeight: 900, color: 'var(--primary)' }}>
+                        <span className="flex items-center gap-2">
+                          <RefreshCw size={14} className="animate-spin" />
+                          DOWNLOADING SYSTEM FILES...
+                        </span>
+                        <span>{Math.round(updateStatus.progress?.percent || 0)}%</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {updateStatus.status === 'error' && updateStatus.error && (
+                    <div style={{ marginBottom: '2.5rem', padding: '1.25rem', background: '#fef2f2', borderRadius: '16px', border: '1px solid #fee2e2', color: '#b91c1c', fontSize: '0.9rem', fontWeight: 600, display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                      <ShieldCheck size={24} />
+                      <div>
+                        <div style={{ fontWeight: 800 }}>Update Failed</div>
+                        <div style={{ opacity: 0.8, fontSize: '0.85rem' }}>{updateStatus.error}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-4">
                     {updateStatus.status === 'downloaded' ? (
-                      <button className="btn btn-primary ripple" onClick={handleRestart} style={{ padding: '1.25rem 3rem', borderRadius: '20px', fontSize: '1.05rem', fontWeight: 900, width: '100%', boxShadow: '0 10px 20px rgba(var(--primary-rgb), 0.2)' }}>
-                        Install Update & Restart
+                      <button className="btn btn-primary ripple" onClick={handleRestart} style={{ padding: '1.5rem', borderRadius: '20px', fontSize: '1.1rem', fontWeight: 900, width: '100%', boxShadow: '0 15px 30px rgba(var(--primary-rgb), 0.25)' }}>
+                        Install Update & Restart Now
                       </button>
                     ) : (
-                      <button className="btn btn-primary ripple" onClick={handleCheckUpdates} disabled={updateStatus.status === 'checking' || updateStatus.status === 'downloading'} style={{ padding: '1.25rem 3rem', borderRadius: '20px', fontSize: '1.05rem', fontWeight: 900, width: '100%', boxShadow: '0 10px 20px rgba(var(--primary-rgb), 0.2)' }}>
-                        {updateStatus.status === 'checking' ? 'Establishing Connection...' : 'Check for System Updates'}
+                      <button 
+                        className="btn btn-primary ripple" 
+                        onClick={handleCheckUpdates} 
+                        disabled={updateStatus.status === 'checking' || updateStatus.status === 'downloading'} 
+                        style={{ padding: '1.5rem', borderRadius: '20px', fontSize: '1.1rem', fontWeight: 900, width: '100%', boxShadow: '0 15px 30px rgba(var(--primary-rgb), 0.25)' }}
+                      >
+                        {updateStatus.status === 'checking' ? 'Connecting to Update Server...' : 'Check for System Updates'}
                       </button>
                     )}
                   </div>
-                </div>
-
-                {/* Right Side: Release Notes / History */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <div className="glass-panel" style={{ padding: '2rem', flex: 1, border: '1px solid var(--border)' }}>
-                    <h5 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)' }}>
-                      <RefreshCw size={20} className="text-accent" /> Recent Version History
-                    </h5>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {[
-                        { version: 'v1.0.0', date: 'Initial Release', note: 'Standard deployment of the FSIC Records System.' },
-                        { version: 'v0.9.8', date: 'Beta Stable', note: 'Added Sister Profiles and Basic Financial Tracking.' },
-                        { version: 'v0.9.5', date: 'Core Alpha', note: 'Database architecture and schema optimization.' }
-                      ].map((v, i) => (
-                        <div key={i} style={{ padding: '1rem', background: i === 0 ? 'rgba(var(--primary-rgb), 0.03)' : 'transparent', borderRadius: '16px', border: i === 0 ? '1px solid rgba(var(--primary-rgb), 0.1)' : '1px dashed var(--border)' }}>
-                          <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                            <span style={{ fontSize: '0.95rem', fontWeight: 900, color: i === 0 ? 'var(--primary)' : 'var(--text-main)' }}>{v.version}</span>
-                            <span style={{ marginLeft: 'auto', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{v.date}</span>
-                          </div>
-                          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{v.note}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="glass-panel" style={{ padding: '1.5rem 2rem', border: '1px solid var(--border)', background: 'linear-gradient(to right, #fff7ed, white)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <ShieldCheck size={24} style={{ color: 'var(--accent)' }} />
-                      <div>
-                        <h6 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 900, color: 'var(--primary)' }}>Auto-Update Status</h6>
-                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Automatic background checks are active.</p>
+                  
+                    <div 
+                      onClick={async () => {
+                        const newVal = !autoUpdate;
+                        setAutoUpdate(newVal);
+                        // @ts-ignore
+                        await window.api.setAutoDownload(newVal);
+                        showToast('success', 'Preference Updated', `Auto-update protection is now ${newVal ? 'active' : 'disabled'}.`);
+                      }}
+                      style={{ 
+                        marginTop: '1rem', 
+                        padding: '1.5rem', 
+                        background: 'rgba(var(--primary-rgb), 0.02)', 
+                        borderRadius: '20px', 
+                        border: '1px solid rgba(0,0,0,0.03)', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '1.25rem',
+                        cursor: 'pointer',
+                        transition: 'var(--transition)'
+                      }}
+                    >
+                      <div style={{ padding: '0.75rem', background: 'white', borderRadius: '12px', color: autoUpdate ? 'var(--success)' : 'var(--text-muted)', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+                        <ShieldCheck size={20} />
                       </div>
-                      <div style={{ marginLeft: 'auto', width: '40px', height: '22px', background: 'var(--accent)', borderRadius: '11px', position: 'relative' }}>
-                        <div style={{ position: 'absolute', top: 3, right: 3, width: 16, height: 16, background: 'white', borderRadius: '50%' }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--primary)' }}>Auto-Update Protection</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Automatically download critical patches in the background.</div>
+                      </div>
+                      <div style={{ 
+                        width: '44px', 
+                        height: '24px', 
+                        background: autoUpdate ? 'var(--success)' : '#cbd5e1', 
+                        borderRadius: '12px', 
+                        position: 'relative', 
+                        transition: 'all 0.3s ease',
+                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' 
+                      }}>
+                        <div style={{ 
+                          position: 'absolute', 
+                          top: 3, 
+                          left: autoUpdate ? 23 : 3, 
+                          width: 18, 
+                          height: 18, 
+                          background: 'white', 
+                          borderRadius: '50%', 
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)' 
+                        }} />
                       </div>
                     </div>
-                  </div>
                 </div>
+              </div>
+              
+              <div style={{ marginTop: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+                System is using Secure Channel 12. Local server at <span style={{ color: 'var(--primary)' }}>127.0.0.1:5432</span>
               </div>
             </div>
           )}

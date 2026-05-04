@@ -69,6 +69,7 @@ const api = {
   // Updater
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
   quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
+  setAutoDownload: (value: boolean) => ipcRenderer.invoke('set-auto-download', value),
   onUpdateStatus: (callback: any) => {
     ipcRenderer.on('update-status', (_, data) => callback(data));
   }
