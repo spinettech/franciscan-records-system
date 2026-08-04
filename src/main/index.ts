@@ -229,9 +229,11 @@ function ensureSchemaUpdated() {
     addCol('Sister', 'region', 'TEXT');
     addCol('Sister', 'religiousName', 'TEXT');
     addCol('Sister', 'passportPhoto', 'TEXT');
+    addCol('Sister', 'dateOfBirth', 'DATETIME');
     addCol('Sister', 'nationality', 'TEXT');
     addCol('Sister', 'originState', 'TEXT');
     addCol('Sister', 'firstProfession', 'DATETIME');
+    addCol('Sister', 'firstVows', 'DATETIME');
     addCol('Sister', 'finalVows', 'DATETIME');
     addCol('Sister', 'currentCommunity', 'TEXT');
     addCol('Sister', 'currentRole', 'TEXT');
@@ -1324,12 +1326,12 @@ app.whenReady().then(async () => {
   // Set app user model id for windows notifications
   electronApp.setAppUserModelId('com.franciscan.records')
 
+  // Ensure database schema is up to date BEFORE any Prisma queries
+  ensureSchemaUpdated()
+
   // Seed default admin user if not exists
   await seedAdmin()
   await seedApostolates()
-
-  // Ensure database schema is up to date (Production migration)
-  ensureSchemaUpdated()
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

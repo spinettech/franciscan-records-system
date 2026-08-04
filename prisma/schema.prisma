@@ -20,6 +20,7 @@ model Sister {
   dateOfBirth       DateTime?
   nationality       String?
   originState       String?
+  firstProfession   DateTime?
   firstVows        DateTime?
   finalVows        DateTime?
   status            String       @default("active") // active, retired, deceased, transferred, mission
