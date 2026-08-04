@@ -123,7 +123,7 @@ const Dashboard = ({ stats, notifications, user, onAddSister, onAddCircular, onV
           <table className="modern-table">
             <thead>
               <tr>
-                <th>Sister Name</th>
+                <th>Religious Name</th>
                 <th>Community</th>
                 <th>Status</th>
                 <th>Joined</th>
@@ -133,7 +133,10 @@ const Dashboard = ({ stats, notifications, user, onAddSister, onAddCircular, onV
               {stats.recentSisters?.length > 0 ? (
                 stats.recentSisters.map((s: any) => (
                   <tr key={s.id}>
-                    <td className="font-semibold">{s.fullName}</td>
+                    <td className="font-semibold">
+                      <div>{s.religiousName || s.fullName}</div>
+                      {s.religiousName && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>{s.fullName}</div>}
+                    </td>
                     <td>{s.currentCommunity || 'Pending Obedience'}</td>
                     <td>
                       <span className={`badge badge-${

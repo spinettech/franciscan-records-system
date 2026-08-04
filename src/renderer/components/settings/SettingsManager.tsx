@@ -635,7 +635,7 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
                   </h4>
                   <div className="flex items-center justify-center gap-3">
                     <span style={{ padding: '0.4rem 1rem', background: '#f1f5f9', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)' }}>
-                      Build v2.0.2
+                      Build v2.0.3
                     </span>
                     <span style={{ width: '4px', height: '4px', background: '#cbd5e1', borderRadius: '50%' }} />
                     <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>

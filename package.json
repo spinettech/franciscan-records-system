@@ -1,6 +1,6 @@
 {
   "name": "franciscan-records-system",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",

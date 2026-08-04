@@ -99,7 +99,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
             </button>
           </form>
           <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            FSIC Institutional Records System v2.0.2
+            FSIC Institutional Records System v2.0.3
           </div>
         </div>
       </div>
