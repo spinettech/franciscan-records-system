@@ -116,7 +116,7 @@ const DocumentManager: React.FC<DocumentManagerProps> = ({ sisterId }) => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h4 className="section-title" style={{ margin: 0 }}>Digital Archives</h4>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Secure storage for certificates, IDs, and official records.</p>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Secure storage for certificates, IDs, and records.</p>
         </div>
         <button className="btn btn-primary btn-sm ripple" onClick={() => setShowUploadModal(true)}>
           <Plus size={16} /> Add Document

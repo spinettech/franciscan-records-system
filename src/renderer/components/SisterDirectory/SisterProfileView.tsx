@@ -90,7 +90,7 @@ const SisterProfileView: React.FC<SisterProfileViewProps> = ({ sister, onBack, o
           <div className="animate-fade-in">
             <h4 className="section-title">Identity & Contact Information</h4>
             <div className="grid grid-2">
-              <ProfileField label="Official Name" value={sister.fullName} icon={UsersIcon} />
+              <ProfileField label="Birth Name" value={sister.fullName} icon={UsersIcon} />
               <ProfileField label="Religious Name" value={sister.religiousName} icon={Award} />
               <ProfileField label="Region Assigned" value={sister.region} icon={MapPin} />
               <ProfileField label="Date of Birth" value={sister.dateOfBirth ? new Date(sister.dateOfBirth).toLocaleDateString(undefined, { dateStyle: 'long' }) : 'Not Recorded'} icon={Calendar} />
@@ -111,7 +111,7 @@ const SisterProfileView: React.FC<SisterProfileViewProps> = ({ sister, onBack, o
             <div className="grid grid-2">
               <ProfileField label="Current Community" value={sister.currentCommunity} icon={Home} />
               <ProfileField label="Assigned Office" value={sister.currentRole} icon={Briefcase} />
-              <ProfileField label="Temporary Profession" value={sister.firstProfession ? new Date(sister.firstProfession).toLocaleDateString(undefined, { dateStyle: 'long' }) : '-'} icon={Calendar} />
+              <ProfileField label="Temporary Vows" value={sister.firstProfession ? new Date(sister.firstProfession).toLocaleDateString(undefined, { dateStyle: 'long' }) : '-'} icon={Calendar} />
               <ProfileField label="Perpetual Vows" value={sister.finalVows ? new Date(sister.finalVows).toLocaleDateString(undefined, { dateStyle: 'long' }) : '-'} icon={Award} />
               <div className="col-span-2">
                 <ProfileField label="Feast Day" value={sister.feastDay ? new Date(sister.feastDay).toLocaleDateString(undefined, { dateStyle: 'long' }) : '-'} icon={Info} />
@@ -131,9 +131,8 @@ const SisterProfileView: React.FC<SisterProfileViewProps> = ({ sister, onBack, o
           <div className="animate-fade-in">
             <h4 className="section-title">Kinship & Emergency Contacts</h4>
             <div className="grid grid-2">
-              <div className="col-span-2">
-                <ProfileField label="Primary Emergency Contact" value={sister.emergencyContact} icon={Phone} />
-              </div>
+              <ProfileField label="Primary Emergency Contact Name" value={sister.emergencyContact} icon={UsersIcon} />
+              <ProfileField label="Primary Emergency Contact Phone" value={sister.emergencyContactPhone} icon={Phone} />
               <div className="col-span-2">
                 <ProfileField label="Emergency Contact Address" value={sister.emergencyContactAddress} icon={MapPin} />
               </div>
@@ -142,7 +141,7 @@ const SisterProfileView: React.FC<SisterProfileViewProps> = ({ sister, onBack, o
                 <h5 style={{ margin: 0, color: 'var(--primary)', fontSize: '0.9rem', fontWeight: 800 }}>LEGAL NEXT OF KIN</h5>
               </div>
 
-              <ProfileField label="Official Name" value={sister.nextOfKinName} icon={UsersIcon} />
+              <ProfileField label="Birth Name" value={sister.nextOfKinName} icon={UsersIcon} />
               <ProfileField label="Relationship" value={sister.nextOfKinRelationship} icon={Heart} />
               <ProfileField label="Phone Contact" value={sister.nextOfKinPhone} icon={Phone} />
               <ProfileField label="Email Address" value={sister.nextOfKinEmail} icon={Mail} />
@@ -164,8 +163,8 @@ const SisterProfileView: React.FC<SisterProfileViewProps> = ({ sister, onBack, o
             <h4 className="section-title">Education & Competencies</h4>
             <div className="grid grid-1">
               <ProfileField label="Higher Education" value={sister.education} icon={BookOpen} />
-              <ProfileField label="Skills & Talents" value={sister.skills} icon={Award} />
               <ProfileField label="Certifications" value={sister.certifications} icon={FileText} />
+              <ProfileField label="Skills & Talents" value={sister.skills} icon={Award} />
               <ProfileField label="Languages" value={sister.languages} icon={Globe} />
             </div>
 

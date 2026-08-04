@@ -20,7 +20,7 @@ const SisterTable: React.FC<SisterTableProps> = ({ sisters, loading, onView, onE
         <tr>
           <th style={{ width: '80px' }}>Photo</th>
           <th>Religious Name</th>
-          <th>Official Name</th>
+          <th>Birth Name</th>
           <th>Current Post</th>
           <th>Status</th>
           <th className="text-center">Actions</th>

@@ -20,7 +20,7 @@ model Sister {
   dateOfBirth       DateTime?
   nationality       String?
   originState       String?
-  firstProfession   DateTime?
+  firstVows        DateTime?
   finalVows        DateTime?
   status            String       @default("active") // active, retired, deceased, transferred, mission
   currentCommunity  String?
@@ -28,6 +28,7 @@ model Sister {
   phone             String?
   email             String?
   emergencyContact  String?
+  emergencyContactPhone String?
   emergencyContactAddress String?
   healthNotes       String?      // Optional access-controlled
   bloodGroup        String?

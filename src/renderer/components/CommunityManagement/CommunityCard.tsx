@@ -40,15 +40,15 @@ const CommunityCard: React.FC<CommunityCardProps> = ({ comm, onEdit, onDelete, o
       </div>
     </div>
 
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', flex: 1, marginRight: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', width: '100%' }}>
         {comm.apostolateType?.split(', ').map((ap: string) => (
           <span key={ap} className="badge badge-info" style={{ fontSize: '0.65rem', whiteSpace: 'nowrap' }}>{ap}</span>
         ))}
       </div>
-      <div className="flex gap-2">
-        <button className="icon-btn" title="View Details" onClick={() => onView(comm)} style={{ color: 'var(--info)' }}><Info size={16} /></button>
+      <div className="flex gap-2" style={{ justifyContent: 'flex-end', paddingTop: '0.5rem', borderTop: '1px dashed var(--border)' }}>
         <button className="icon-btn" title="Edit House" onClick={() => onEdit(comm)}><Edit size={16} /></button>
+        <button className="icon-btn" title="View Details" onClick={() => onView(comm)} style={{ color: 'var(--info)' }}><Info size={16} /></button>
         <button className="icon-btn" style={{ color: 'var(--danger)' }} title="Delete" onClick={() => onDelete(comm.id)}><Trash size={16} /></button>
       </div>
     </div>

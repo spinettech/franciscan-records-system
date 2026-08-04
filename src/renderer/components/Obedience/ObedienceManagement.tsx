@@ -226,11 +226,11 @@ const ObedienceManagement = () => {
                                 boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
                               }}
                             >
-                              {!sister.passportPhoto && sister.fullName.charAt(0)}
+                              {!sister.passportPhoto && (sister.religiousName || sister.fullName).charAt(0)}
                             </div>
                             <div>
-                              <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1rem' }}>{sister.fullName}</div>
-                              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{sister.religiousName || 'No Religious Name'}</div>
+                              <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1rem' }}>{sister.religiousName || sister.fullName}</div>
+                              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{sister.religiousName ? sister.fullName : 'No Religious Name'}</div>
                             </div>
                           </div>
                         </td>
@@ -266,7 +266,7 @@ const ObedienceManagement = () => {
                             className="btn btn-outline btn-sm ripple"
                             onClick={() => {
                               setSelectedSisterId(sister.id);
-                              setSelectedSisterName(sister.fullName);
+                              setSelectedSisterName(sister.religiousName || sister.fullName);
                             }}
                             style={{ borderRadius: '10px' }}
                           >

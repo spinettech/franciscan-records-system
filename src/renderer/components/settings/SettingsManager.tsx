@@ -239,7 +239,7 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
               <form onSubmit={handleUpdateProfile} className="grid gap-8" style={{ maxWidth: '800px' }}>
                 <div className="grid grid-2">
                   <div className="form-group">
-                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Official Full Name</label>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Name</label>
                     <input
                       style={{ marginTop: '0.5rem', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)' }}
                       value={profile.fullName}
@@ -260,7 +260,7 @@ const SettingsManager = ({ user, onUserUpdate }: { user: any, onUserUpdate: (u: 
                 </div>
 
                 <div className="form-group">
-                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Official Email Address</label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Address</label>
                   <input
                     type="email"
                     style={{ marginTop: '0.5rem', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)' }}

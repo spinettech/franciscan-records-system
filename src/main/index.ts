@@ -238,6 +238,7 @@ function ensureSchemaUpdated() {
     addCol('Sister', 'phone', 'TEXT');
     addCol('Sister', 'email', 'TEXT');
     addCol('Sister', 'emergencyContact', 'TEXT');
+    addCol('Sister', 'emergencyContactPhone', 'TEXT');
     addCol('Sister', 'emergencyContactAddress', 'TEXT');
     addCol('Sister', 'healthNotes', 'TEXT');
     addCol('Sister', 'bloodGroup', 'TEXT');
@@ -953,14 +954,14 @@ ipcMain.handle('export-sisters', async (event, { format }) => {
     if (format === 'excel') {
       const data = sisters.map((s: any) => ({
         'ID': s.id,
-        'Official Name': s.fullName,
+        'Birth Name': s.fullName,
         'Religious Name': s.religiousName || '',
         'Date of Birth': s.dateOfBirth ? s.dateOfBirth.toLocaleDateString() : '',
         'Place of Birth': s.placeOfBirth || '',
         'Nationality': s.nationality || '',
         'Origin State': s.originState || '',
         'Origin Country': s.originCountry || '',
-        'Temporary Profession': s.firstProfession ? s.firstProfession.toLocaleDateString() : '',
+        'Temporary Vows': s.firstProfession ? s.firstProfession.toLocaleDateString() : '',
         'Perpetual Vows': s.finalVows ? s.finalVows.toLocaleDateString() : '',
         'Status': s.status,
         'Current Community': s.currentCommunity || '',
@@ -1000,7 +1001,7 @@ ipcMain.handle('export-sisters', async (event, { format }) => {
       doc.text(`Exported on: ${new Date().toLocaleString()}`, 14, 28)
       doc.text(`Total Records: ${sisters.length}`, 14, 33)
 
-      const tableHeaders = [['S/N', 'Official Name', 'Religious Name', 'Birth Date', 'Status', 'Community', 'Phone', 'Profession']]
+      const tableHeaders = [['S/N', 'Birth Name', 'Religious Name', 'Birth Date', 'Status', 'Community', 'Phone', 'Profession']]
       const tableData = sisters.map((s: any, index: number) => [
         index + 1,
         s.fullName,
@@ -1070,7 +1071,7 @@ ipcMain.handle('import-sisters', async (event) => {
         // Map Excel headers to Prisma field names
         // Flexible mapping: handles both 'Full Name' and 'fullName' etc.
         const sisterData: any = {
-          fullName: row['Official Name'] || row['Full Name'] || row['fullName'] || row['Name'],
+          fullName: row['Birth Name'] || row['Official Name'] || row['Full Name'] || row['fullName'] || row['Name'],
           religiousName: row['Religious Name'] || row['religiousName'],
         }
 
@@ -1095,7 +1096,7 @@ ipcMain.handle('import-sisters', async (event) => {
           nationality: row['Nationality'] || row['nationality'],
           originState: row['Origin State'] || row['originState'],
           originCountry: row['Origin Country'] || row['originCountry'],
-          firstProfession: row['Temporary Profession'] || row['TemporaryProfession'] || row['First Profession'] || row['firstProfession'] ? new Date(row['Temporary Profession'] || row['TemporaryProfession'] || row['First Profession'] || row['firstProfession']) : null,
+          firstProfession: row['Temporary Vows'] || row['TemporaryVows'] || row['First Profession'] || row['firstProfession'] ? new Date(row['Temporary Vows'] || row['TemporaryVows'] || row['First Profession'] || row['firstProfession']) : null,
           finalVows: row['Perpetual Vows'] || row['PerpetualVows'] || row['Final Vows'] || row['finalVows'] ? new Date(row['Perpetual Vows'] || row['PerpetualVows'] || row['Final Vows'] || row['finalVows']) : null,
           status: (row['Status'] || row['status'] || 'active').toLowerCase(),
           currentCommunity: row['Current Community'] || row['currentCommunity'] || row['Community'],

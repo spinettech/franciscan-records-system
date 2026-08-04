@@ -483,7 +483,7 @@ const CommunityReportManager: React.FC<CommunityReportManagerProps> = ({ communi
                   fontWeight: 600
                 }}>
                   <Info size={18} className="text-info" />
-                  Official Franciscan System Community Archive Entry • Authorized Personnel Only
+                  Franciscan System Community Archive Entry • Authorized Personnel Only
                 </div>
               </div>
             </div>

@@ -90,7 +90,7 @@ const Dashboard = ({ stats, notifications, user, onAddSister, onAddCircular, onV
       <div className="stat-card">
         <div className="flex justify-between items-start">
           <div>
-            <div className="stat-label">Finally Professed</div>
+            <div className="stat-label">Perpetual Profession</div>
             <div className="stat-value">{stats.finallyProfessed}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px', color: '#8b5cf6', height: 'fit-content' }}>

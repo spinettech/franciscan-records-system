@@ -223,7 +223,7 @@ const CommunityInfoView: React.FC<CommunityInfoViewProps> = ({ community, onBack
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div className="info-block">
-                <label style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase' }}>Official Name</label>
+                <label style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase' }}>Birth Name</label>
                 <p style={{ fontWeight: 700, margin: '4px 0' }}>{selectedSister.fullName}</p>
               </div>
               <div className="info-block">
