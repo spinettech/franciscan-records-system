@@ -100,8 +100,8 @@ const ObedienceManagement = () => {
     <div className="animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto' }}>
       <header className="page-header" style={{ alignItems: 'center', marginBottom: '2rem' }}>
         <div>
-          <h1 style={{ fontSize: '2.25rem', fontWeight: 900 }}>Mission & Obediences</h1>
-          <p style={{ fontSize: '1rem', opacity: 0.8 }}>Manage transfers and community postings across the province.</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 850, letterSpacing: '-0.02em' }}>Mission & Obediences</h1>
+          <p className="text-muted" style={{ fontSize: '0.85rem' }}>Manage transfers and community postings across the province.</p>
         </div>
         <div className="flex gap-3">
           <button className="btn btn-outline" onClick={fetchData}><History size={18} /> Refresh</button>
@@ -112,26 +112,22 @@ const ObedienceManagement = () => {
       <div className="stats-grid" style={{ gap: '1.5rem', marginBottom: '2.5rem' }}>
         <div className="stat-card" style={{ padding: '1.5rem', border: 'none', background: 'linear-gradient(135deg, #1e293b, #0f172a)', color: 'white' }}>
           <div className="stat-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Total Postings</div>
-          <div className="stat-value" style={{ color: 'white', fontSize: '2rem' }}>{stats.totalObediences}</div>
-          <div className="stat-trend" style={{ color: 'var(--accent)' }}>Province History</div>
+          <div className="stat-value" style={{ color: 'white', fontSize: '1.5rem' }}>{stats.totalObediences}</div>
           <ArrowRightLeft size={48} style={{ position: 'absolute', right: '1rem', bottom: '1rem', opacity: 0.1 }} />
         </div>
         <div className="stat-card" style={{ padding: '1.5rem' }}>
           <div className="stat-label">Active Missions</div>
-          <div className="stat-value" style={{ fontSize: '2rem' }}>{stats.activeMissions}</div>
-          <div className="stat-trend positive">Current Field Staff</div>
+          <div className="stat-value" style={{ fontSize: '1.5rem' }}>{stats.activeMissions}</div>
           <Globe size={48} className="text-success" style={{ position: 'absolute', right: '1rem', bottom: '1rem', opacity: 0.05 }} />
         </div>
         <div className="stat-card" style={{ padding: '1.5rem' }}>
           <div className="stat-label">Recent Transfers</div>
-          <div className="stat-value" style={{ fontSize: '2rem' }}>{stats.recentTransfers}</div>
-          <div className="stat-trend warning">Last 30 Days</div>
+          <div className="stat-value" style={{ fontSize: '1.5rem' }}>{stats.recentTransfers}</div>
           <TrendingUp size={48} className="text-warning" style={{ position: 'absolute', right: '1rem', bottom: '1rem', opacity: 0.05 }} />
         </div>
         <div className="stat-card" style={{ padding: '1.5rem' }}>
           <div className="stat-label">Mission Stations</div>
-          <div className="stat-value" style={{ fontSize: '2rem' }}>{stats.uniqueCommunities}</div>
-          <div className="stat-trend info">Unique Locations</div>
+          <div className="stat-value" style={{ fontSize: '1.5rem' }}>{stats.uniqueCommunities}</div>
           <MapPin size={48} className="text-info" style={{ position: 'absolute', right: '1rem', bottom: '1rem', opacity: 0.05 }} />
         </div>
       </div>

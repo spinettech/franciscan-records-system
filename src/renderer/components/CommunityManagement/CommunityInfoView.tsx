@@ -36,59 +36,59 @@ const CommunityInfoView: React.FC<CommunityInfoViewProps> = ({ community, onBack
           <div className="flex items-center gap-4">
             <button onClick={onBack} className="icon-btn"><ArrowLeft size={20} /></button>
             <div>
-              <h1>{community.name} Details</h1>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginTop: '0.5rem' }}>
+              <h1 style={{ fontSize: '1.5rem' }}>{community.name} Details</h1>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginTop: '0.35rem' }}>
                 {community.apostolateType?.split(', ').map((ap: string) => (
-                  <span key={ap} className="badge badge-info" style={{ fontSize: '0.75rem' }}>{ap}</span>
+                  <span key={ap} className="badge badge-info" style={{ fontSize: '0.68rem' }}>{ap}</span>
                 ))}
-                <span className="text-muted" style={{ fontSize: '0.9rem', marginLeft: '0.5rem' }}>• {community.location}</span>
+                <span className="text-muted" style={{ fontSize: '0.8rem', marginLeft: '0.5rem' }}>• {community.location}</span>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="flex gap-4 mb-8" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0' }}>
+      <div className="flex gap-4 mb-6" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0' }}>
         <button 
           className={`tab-btn ${activeTab === 'residents' ? 'active' : ''}`}
           onClick={() => setActiveTab('residents')}
           style={{ 
-            padding: '1rem 1.5rem', 
+            padding: '0.75rem 1.25rem', 
             fontWeight: 800, 
-            fontSize: '0.9rem',
+            fontSize: '0.82rem',
             borderBottom: activeTab === 'residents' ? '3px solid var(--accent)' : '3px solid transparent',
             color: activeTab === 'residents' ? 'var(--primary)' : 'var(--text-muted)',
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '0.4rem'
           }}
         >
-          <Users size={18} /> Resident Sisters
+          <Users size={16} /> Resident Sisters
         </button>
         <button 
           className={`tab-btn ${activeTab === 'reports' ? 'active' : ''}`}
           onClick={() => setActiveTab('reports')}
           style={{ 
-            padding: '1rem 1.5rem', 
+            padding: '0.75rem 1.25rem', 
             fontWeight: 800, 
-            fontSize: '0.9rem',
+            fontSize: '0.82rem',
             borderBottom: activeTab === 'reports' ? '3px solid var(--accent)' : '3px solid transparent',
             color: activeTab === 'reports' ? 'var(--primary)' : 'var(--text-muted)',
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '0.4rem'
           }}
         >
-          <FileText size={18} /> Community Reports
+          <FileText size={16} /> Community Reports
         </button>
       </div>
 
       {activeTab === 'residents' ? (
-        <div className="grid grid-2" style={{ gap: '2.5rem', alignItems: 'start' }}>
-          <div className="glass-panel" style={{ padding: '2.5rem' }}>
-            <h3 style={{ marginBottom: '1.5rem', fontWeight: 800 }}>House Information</h3>
+        <div className="grid grid-2" style={{ gap: '2rem', alignItems: 'start' }}>
+          <div className="glass-panel" style={{ padding: '1.75rem' }}>
+            <h3 style={{ marginBottom: '1.25rem', fontWeight: 850, fontSize: '0.98rem' }}>House Information</h3>
             <div style={{ display: 'grid', gap: '1.25rem' }}>
               <div style={{ display: 'flex', gap: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '14px' }}>
                 <div style={{ color: 'var(--accent)' }}><Shield size={20} /></div>

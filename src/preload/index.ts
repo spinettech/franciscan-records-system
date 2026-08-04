@@ -33,6 +33,7 @@ const api = {
 
   // Stats & Dashboard
   getDashboardStats: () => ipcRenderer.invoke('get-dashboard-stats'),
+  getFullAnalytics: () => ipcRenderer.invoke('get-full-analytics'),
   getNotifications: () => ipcRenderer.invoke('get-notifications'),
 
   // Auth & Security

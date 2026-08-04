@@ -13,6 +13,8 @@ import {
   Award,
   Heart,
   BookOpen,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { showToast } from "../../utils/toast";
 import FieldErr from "../shared/FieldErr";
@@ -129,6 +131,68 @@ const SisterProfileForm = ({
   const fileRef = useRef<HTMLInputElement>(null);
   const [communities, setCommunities] = useState<any[]>([]);
 
+  const [obediencesList, setObediencesList] = useState<
+    Array<{
+      id?: string;
+      communityName: string;
+      officeHeld: string;
+      startDate: string;
+      endDate: string;
+      remarks: string;
+    }>
+  >(() => {
+    if (sister?.Obediences && sister.Obediences.length > 0) {
+      return sister.Obediences.map((o: any) => ({
+        id: o.id,
+        communityName: o.communityName || "",
+        officeHeld: o.officeHeld || "",
+        startDate: o.startDate
+          ? new Date(o.startDate).toISOString().split("T")[0]
+          : "",
+        endDate: o.endDate
+          ? new Date(o.endDate).toISOString().split("T")[0]
+          : "",
+        remarks: o.remarks || "",
+      }));
+    }
+    return [
+      {
+        communityName: "",
+        officeHeld: "",
+        startDate: "",
+        endDate: "",
+        remarks: "",
+      },
+    ];
+  });
+
+  const handleAddObedience = () => {
+    setObediencesList((prev) => [
+      ...prev,
+      {
+        communityName: "",
+        officeHeld: "",
+        startDate: "",
+        endDate: "",
+        remarks: "",
+      },
+    ]);
+  };
+
+  const handleRemoveObedience = (index: number) => {
+    setObediencesList((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleObedienceChange = (
+    index: number,
+    field: string,
+    value: string,
+  ) => {
+    setObediencesList((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
+    );
+  };
+
   useEffect(() => {
     // @ts-ignore
     window.api
@@ -236,21 +300,47 @@ const SisterProfileForm = ({
       } = payload;
       const finalPayload = { ...restPayload };
 
-      if (!sister?.id && ObedienceCommunity && ObedienceStartDate) {
+      // Process dynamic obediences array
+      const validObediences = obediencesList
+        .filter((o) => o.communityName.trim() && o.startDate)
+        .map((o) => ({
+          id: o.id,
+          communityName: o.communityName.trim(),
+          officeHeld: o.officeHeld.trim() || "Member",
+          ministryType: "Missionary",
+          startDate: new Date(o.startDate),
+          endDate: o.endDate ? new Date(o.endDate) : null,
+          remarks: o.remarks ? o.remarks.trim() : null,
+        }));
+
+      if (!sister?.id && validObediences.length > 0) {
         finalPayload.Obediences = {
-          create: [
-            {
-              communityName: ObedienceCommunity,
-              officeHeld: ObedienceRole || "Member",
-              ministryType: "Missionary",
-              startDate: new Date(ObedienceStartDate),
-            },
-          ],
+          create: validObediences.map(({ id, ...rest }) => rest),
         };
+        const currentActive =
+          validObediences.find((o) => !o.endDate) ||
+          validObediences[validObediences.length - 1];
+        if (currentActive) {
+          finalPayload.currentCommunity = currentActive.communityName;
+          finalPayload.currentRole = currentActive.officeHeld;
+        }
       }
 
       // @ts-ignore
-      await window.api.upsertSister(sister?.id, finalPayload);
+      const savedSister = await window.api.upsertSister(sister?.id, finalPayload);
+      const targetSisterId = sister?.id || savedSister?.id;
+
+      if (sister?.id && validObediences.length > 0 && targetSisterId) {
+        for (const ob of validObediences) {
+          if (!ob.id) {
+            // @ts-ignore
+            await window.api.upsertObedience({
+              ...ob,
+              sisterId: targetSisterId,
+            });
+          }
+        }
+      }
       showToast(
         "success",
         "Profile Saved",
@@ -473,10 +563,12 @@ const SisterProfileForm = ({
             <FG label="Membership Status">
               <select {...register("status")}>
                 <option value="Active">Active</option>
+                <option value="in Formation">in Formation</option>
+                <option value="on Mission">on Mission</option>
                 <option value="Exclaustration">Exclaustration</option>
+                <option value="Departure">Departure</option>
                 <option value="Dismissed">Dismissed</option>
                 <option value="Deceased">Deceased</option>
-                <option value="on Mission">on Mission</option>
               </select>
             </FG>
             <FG label="Current Community / Convent">
@@ -701,45 +793,191 @@ const SisterProfileForm = ({
       {step === 4 && (
         <div className="glass-panel wiz-body animate-fade-in">
           <div
-            className="flex items-center gap-3 mb-8"
+            className="flex items-center justify-between mb-8"
             style={{
-              padding: "1rem",
+              padding: "1.25rem 1.5rem",
               background: "rgba(var(--primary-rgb), 0.03)",
-              borderRadius: "12px",
+              borderRadius: "14px",
+              border: "1px solid var(--border)",
             }}
           >
-            <div style={{ color: "var(--accent)" }}>
-              <ArrowRightLeft size={24} />
+            <div className="flex items-center gap-3">
+              <div
+                style={{
+                  color: "var(--accent)",
+                  padding: "0.5rem",
+                  background: "rgba(249,115,22,0.1)",
+                  borderRadius: "10px",
+                }}
+              >
+                <ArrowRightLeft size={24} />
+              </div>
+              <div>
+                <h4 style={{ margin: 0, fontWeight: 800, fontSize: "1.1rem" }}>
+                  Record Postings & Obediences
+                </h4>
+                <p className="text-muted" style={{ fontSize: "0.85rem", margin: "0.2rem 0 0" }}>
+                  Record her past and current mission assignments. Click "+ Add Posting" to add past or additional postings.
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 style={{ margin: 0, fontWeight: 800 }}>
-                Record First Posting
-              </h4>
-              <p className="text-muted" style={{ fontSize: "0.85rem" }}>
-                Where will this sister serve her first mission?
-              </p>
-            </div>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm ripple"
+              style={{
+                background: "white",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                borderRadius: "10px",
+                fontWeight: 700,
+              }}
+              onClick={handleAddObedience}
+            >
+              <Plus size={16} /> Add Posting
+            </button>
           </div>
-          <div className="grid grid-2">
-            <FG label="Community / House Obedience" full>
-              <select {...register("ObedienceCommunity")}>
-                <option value="">Select Community House...</option>
-                {communities.map((c) => (
-                  <option key={c.id} value={c.name}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </FG>
-            <FG label="Role / Designation">
-              <input
-                {...register("ObedienceRole")}
-                placeholder="e.g. Member, Bursar, Secretary"
-              />
-            </FG>
-            <FG label="Obedience Start Date">
-              <input type="date" {...register("ObedienceStartDate")} />
-            </FG>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {obediencesList.map((ob, idx) => (
+              <div
+                key={idx}
+                style={{
+                  padding: "1.5rem",
+                  background: "white",
+                  border: "1px solid var(--border)",
+                  borderRadius: "16px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.02)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "1.25rem",
+                    paddingBottom: "0.75rem",
+                    borderBottom: "1px solid var(--border)",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <span
+                      style={{
+                        fontSize: "0.8rem",
+                        fontWeight: 800,
+                        color: "var(--primary)",
+                        background: "rgba(var(--primary-rgb), 0.08)",
+                        padding: "0.25rem 0.6rem",
+                        borderRadius: "6px",
+                      }}
+                    >
+                      Posting #{idx + 1}
+                    </span>
+                    <span
+                      className={`badge badge-${
+                        ob.endDate ? "secondary" : "success"
+                      }`}
+                      style={{ fontSize: "0.65rem" }}
+                    >
+                      {ob.endDate ? "Past Posting" : "Active / Current"}
+                    </span>
+                  </div>
+                  {obediencesList.length > 1 && (
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      style={{ color: "var(--danger)", width: "32px", height: "32px" }}
+                      title="Remove posting entry"
+                      onClick={() => handleRemoveObedience(idx)}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-2">
+                  <FG label="Community / House Obedience" full>
+                    <select
+                      value={ob.communityName}
+                      onChange={(e) =>
+                        handleObedienceChange(idx, "communityName", e.target.value)
+                      }
+                    >
+                      <option value="">Select Community House...</option>
+                      {communities.map((c) => (
+                        <option key={c.id} value={c.name}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </FG>
+                  <FG label="Role / Designation">
+                    <input
+                      value={ob.officeHeld}
+                      onChange={(e) =>
+                        handleObedienceChange(idx, "officeHeld", e.target.value)
+                      }
+                      placeholder="e.g. Co-ordinator, Bursar, Secretary, Member"
+                    />
+                  </FG>
+                  <FG label="Start Date">
+                    <input
+                      type="date"
+                      value={ob.startDate}
+                      onChange={(e) =>
+                        handleObedienceChange(idx, "startDate", e.target.value)
+                      }
+                    />
+                  </FG>
+                  <FG label="End Date (Optional for past postings)">
+                    <input
+                      type="date"
+                      value={ob.endDate}
+                      onChange={(e) =>
+                        handleObedienceChange(idx, "endDate", e.target.value)
+                      }
+                    />
+                  </FG>
+                  <FG label="Remarks / Notes (Optional)" full>
+                    <input
+                      value={ob.remarks}
+                      onChange={(e) =>
+                        handleObedienceChange(idx, "remarks", e.target.value)
+                      }
+                      placeholder="Additional remarks or notes about this posting..."
+                    />
+                  </FG>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div
+            style={{
+              marginTop: "2rem",
+              display: "flex",
+              justify: "center",
+            }}
+          >
+            <button
+              type="button"
+              className="btn btn-outline ripple"
+              style={{
+                background: "white",
+                borderColor: "var(--accent)",
+                color: "var(--accent)",
+                fontWeight: 700,
+                padding: "0.8rem 1.75rem",
+                borderRadius: "14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                boxShadow: "0 4px 14px rgba(249, 115, 22, 0.1)",
+              }}
+              onClick={handleAddObedience}
+            >
+              <Plus size={18} /> Add Another Obedience / Posting
+            </button>
           </div>
         </div>
       )}

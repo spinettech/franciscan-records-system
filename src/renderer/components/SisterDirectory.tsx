@@ -176,11 +176,13 @@ const SisterDirectory = ({ initialAddMode = false, preSelectedId = null, onModeR
             <Filter size={16} />
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
               <option value="">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="retired">Retired</option>
-              <option value="mission">On Mission</option>
-              <option value="transferred">Transferred</option>
-              <option value="deceased">Deceased</option>
+              <option value="Active">Active</option>
+              <option value="in Formation">in Formation</option>
+              <option value="on Mission">On Mission</option>
+              <option value="Exclaustration">Exclaustration</option>
+              <option value="Departure">Departure</option>
+              <option value="Dismissed">Dismissed</option>
+              <option value="Deceased">Deceased</option>
             </select>
           </div>
           <div className="filter-item">

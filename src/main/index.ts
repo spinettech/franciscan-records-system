@@ -877,6 +877,8 @@ ipcMain.handle('get-dashboard-stats', async () => {
   const active = await prisma.sister.count({ where: { status: 'Active' } })
   const mission = await prisma.sister.count({ where: { status: 'on Mission' } })
   const exclaustration = await prisma.sister.count({ where: { status: 'Exclaustration' } })
+  const formation = await prisma.sister.count({ where: { OR: [{ status: 'Formation' }, { status: 'in Formation' }] } })
+  const departure = await prisma.sister.count({ where: { OR: [{ status: 'Departure' }, { status: 'Departed' }] } })
   const deceased = await prisma.sister.count({ where: { status: 'Deceased' } })
   const dismissed = await prisma.sister.count({ where: { status: 'Dismissed' } })
   
@@ -892,6 +894,51 @@ ipcMain.handle('get-dashboard-stats', async () => {
     }
   })
 
+  // Regional & Age Demographics analytics
+  const sistersData = await prisma.sister.findMany({
+    select: { region: true, dateOfBirth: true }
+  })
+
+  const regionMap: Record<string, number> = {}
+  let under30 = 0, age30to50 = 0, age51to70 = 0, over70 = 0, ageUnknown = 0
+  const now = new Date()
+
+  sistersData.forEach(s => {
+    const reg = s.region?.trim() || 'Unassigned Region'
+    regionMap[reg] = (regionMap[reg] || 0) + 1
+
+    if (s.dateOfBirth) {
+      const dob = new Date(s.dateOfBirth)
+      let age = now.getFullYear() - dob.getFullYear()
+      const m = now.getMonth() - dob.getMonth()
+      if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--
+
+      if (age < 30) under30++
+      else if (age <= 50) age30to50++
+      else if (age <= 70) age51to70++
+      else over70++
+    } else {
+      ageUnknown++
+    }
+  })
+
+  const regionBreakdown = Object.entries(regionMap).map(([name, count]) => ({
+    name,
+    count,
+    percentage: total > 0 ? Math.round((count / total) * 100) : 0
+  })).sort((a, b) => b.count - a.count)
+
+  const ageBreakdown = {
+    under30,
+    age30to50,
+    age51to70,
+    over70,
+    ageUnknown
+  }
+
+  const communitiesCount = await prisma.community.count()
+  const obediencesCount = await prisma.Obedience.count()
+
   const recentSisters = await prisma.sister.findMany({
     take: 5,
     orderBy: { createdAt: 'desc' }
@@ -902,11 +949,209 @@ ipcMain.handle('get-dashboard-stats', async () => {
     active, 
     mission, 
     exclaustration,
+    formation,
+    departure,
     deceased,
     dismissed,
     finallyProfessed, 
-    notFinallyProfessed, 
+    notFinallyProfessed,
+    regionBreakdown,
+    ageBreakdown,
+    communitiesCount,
+    obediencesCount,
     recentSisters 
+  }
+})
+
+ipcMain.handle('get-full-analytics', async () => {
+  try {
+    const sisters = await prisma.sister.findMany({
+      include: {
+        Obediences: {
+          orderBy: { startDate: 'desc' }
+        }
+      },
+      orderBy: { fullName: 'asc' }
+    })
+
+    const communities = await prisma.community.findMany()
+
+    const totalSisters = sisters.length
+    const now = new Date()
+
+    // Status metrics
+    const statusCounts: Record<string, number> = {
+      Active: 0,
+      'in Formation': 0,
+      'on Mission': 0,
+      Exclaustration: 0,
+      Departure: 0,
+      Deceased: 0,
+      Dismissed: 0,
+    }
+
+    // Vows metrics
+    let perpetualCount = 0
+    let temporaryCount = 0
+
+    // Age metrics
+    let under30 = 0, age30to50 = 0, age51to70 = 0, over70 = 0, ageUnknown = 0
+
+    // Regional metrics
+    const regionMap: Record<string, { total: number; active: number; formation: number; deceased: number }> = {}
+
+    // Apostolates / Ministry metrics
+    const apostolateMap: Record<string, number> = {}
+
+    // Jubilarians tracking
+    const jubilarians: any[] = []
+
+    // Sister Tenure metrics
+    let postingUnder1Yr = 0, posting1to3Yrs = 0, posting3to5Yrs = 0, postingOver5Yrs = 0, noPosting = 0
+
+    sisters.forEach(s => {
+      // Status count
+      const st = s.status || 'Active'
+      statusCounts[st] = (statusCounts[st] || 0) + 1
+
+      // Vows
+      if (s.finalVows) perpetualCount++
+      else temporaryCount++
+
+      // Age & Jubilees
+      let age = null
+      if (s.dateOfBirth) {
+        const dob = new Date(s.dateOfBirth)
+        age = now.getFullYear() - dob.getFullYear()
+        const m = now.getMonth() - dob.getMonth()
+        if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--
+
+        if (age < 30) under30++
+        else if (age <= 50) age30to50++
+        else if (age <= 70) age51to70++
+        else over70++
+      } else {
+        ageUnknown++
+      }
+
+      // Jubilee calculation
+      const profDate = s.finalVows ? new Date(s.finalVows) : (s.firstVows ? new Date(s.firstVows) : null)
+      if (profDate) {
+        const years = now.getFullYear() - profDate.getFullYear()
+        if (years === 25 || years === 40 || years === 50 || years === 60) {
+          jubilarians.push({
+            id: s.id,
+            religiousName: s.religiousName || s.fullName,
+            fullName: s.fullName,
+            years,
+            vowsType: s.finalVows ? 'Perpetual Vows' : 'First Vows',
+            profDate
+          })
+        }
+      }
+
+      // Region metrics
+      const reg = s.region?.trim() || 'Unassigned Region'
+      if (!regionMap[reg]) {
+        regionMap[reg] = { total: 0, active: 0, formation: 0, deceased: 0 }
+      }
+      regionMap[reg].total++
+      if (s.status === 'Active' || s.status === 'on Mission') regionMap[reg].active++
+      if (s.status === 'in Formation' || s.status === 'Formation') regionMap[reg].formation++
+      if (s.status === 'Deceased') regionMap[reg].deceased++
+
+      // Posting tenure
+      const currentPosting = s.Obediences.find(o => !o.endDate) || s.Obediences[0]
+      if (currentPosting && currentPosting.startDate) {
+        const start = new Date(currentPosting.startDate)
+        const tenureYrs = (now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365.25)
+        if (tenureYrs < 1) postingUnder1Yr++
+        else if (tenureYrs <= 3) posting1to3Yrs++
+        else if (tenureYrs <= 5) posting3to5Yrs++
+        else postingOver5Yrs++
+      } else {
+        noPosting++
+      }
+    })
+
+    // Format region array
+    const regionBreakdown = Object.entries(regionMap).map(([name, data]) => ({
+      name,
+      ...data,
+      percentage: totalSisters > 0 ? Math.round((data.total / totalSisters) * 100) : 0
+    })).sort((a, b) => b.total - a.total)
+
+    // Community Occupancy analytics
+    const communityAnalytics = communities.map(c => ({
+      id: c.id,
+      name: c.name,
+      diocese: c.diocese,
+      location: c.location,
+      currentSistersCount: sisters.filter(s => s.currentCommunity === c.name && s.status !== 'Deceased' && s.status !== 'Dismissed').length,
+      apostolates: c.apostolateType ? c.apostolateType.split(',').map(a => a.trim()) : []
+    })).sort((a, b) => b.currentSistersCount - a.currentSistersCount)
+
+    // Aggregate apostolates count
+    communityAnalytics.forEach(c => {
+      c.apostolates.forEach(a => {
+        if (a) apostolateMap[a] = (apostolateMap[a] || 0) + 1
+      })
+    })
+
+    const apostolatesBreakdown = Object.entries(apostolateMap).map(([name, count]) => ({
+      name,
+      count
+    })).sort((a, b) => b.count - a.count)
+
+    return {
+      totalSisters,
+      totalCommunities: communities.length,
+      totalObediences: sisters.reduce((acc, s) => acc + s.Obediences.length, 0),
+      statusCounts,
+      vowsBreakdown: {
+        perpetual: perpetualCount,
+        temporary: temporaryCount,
+        perpetualPct: totalSisters > 0 ? Math.round((perpetualCount / totalSisters) * 100) : 0,
+        temporaryPct: totalSisters > 0 ? Math.round((temporaryCount / totalSisters) * 100) : 0,
+      },
+      ageBreakdown: {
+        under30,
+        age30to50,
+        age51to70,
+        over70,
+        ageUnknown
+      },
+      tenureBreakdown: {
+        postingUnder1Yr,
+        posting1to3Yrs,
+        posting3to5Yrs,
+        postingOver5Yrs,
+        noPosting
+      },
+      regionBreakdown,
+      communityAnalytics,
+      apostolatesBreakdown,
+      jubilarians,
+      allRecordsSummary: sisters.map(s => ({
+        id: s.id,
+        sisterId: (s as any).sisterId || '',
+        religiousName: s.religiousName,
+        fullName: s.fullName,
+        status: s.status,
+        region: s.region || 'Unassigned',
+        currentCommunity: s.currentCommunity || 'None',
+        currentRole: s.currentRole || 'Member',
+        vowsType: s.finalVows ? 'Perpetual' : 'Temporary',
+        dateOfBirth: s.dateOfBirth,
+        firstVows: s.firstVows,
+        finalVows: s.finalVows,
+        obediencesCount: s.Obediences.length,
+        createdAt: s.createdAt
+      }))
+    }
+  } catch (error) {
+    console.error('Error calculating full analytics:', error)
+    throw error
   }
 })
 

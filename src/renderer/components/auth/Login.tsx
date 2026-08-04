@@ -31,19 +31,29 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
 
   return (
     <div className="login-container">
-      <div className="login-card glass-panel no-padding overflow-hidden">
-        <div className="login-hero-container">
-          <img src={francisImg} alt="St. Francis" className="login-hero-image" />
-          <div className="login-logo-overlay">
-            <img src={logoImg} alt="FSIC Logo" className="login-logo-image" />
+      {/* Faint St. Francis Background Image */}
+      <div 
+        className="login-faint-bg" 
+        style={{ 
+          backgroundImage: `url(${francisImg})` 
+        }} 
+      />
+
+      {/* Pure White Login Card */}
+      <div className="login-card">
+        <div style={{ padding: '2.5rem 2.5rem 1rem', textAlign: 'center', background: 'white' }}>
+          <div style={{ display: 'inline-flex', padding: '0.5rem', background: 'rgba(194, 99, 16, 0.08)', borderRadius: '50%', marginBottom: '0.85rem' }}>
+            <img src={logoImg} alt="FSIC Logo" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover' }} />
           </div>
-          <div className="logo-section absolute-logo text-center">
-            <div className="logo-text">FSIC</div>
-            <div className="logo-subtext">FRANCISCAN SISTERS OF THE <br /> IMMACULATE CONCEPTION</div>
-          </div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 850, color: 'var(--primary)', margin: '0 0 0.25rem 0', letterSpacing: '-0.01em' }}>
+            Franciscan Sisters of the Immaculate Conception
+          </h2>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, fontWeight: 600 }}>
+            Provincial Secretariat Record System
+          </p>
         </div>
 
-        <div style={{ padding: '2rem 2.5rem 1.5rem' }}>
+        <div style={{ padding: '1rem 2.5rem 2.25rem', background: 'white' }}>
           <form onSubmit={handleSubmit}>
             <div className="form-group mb-4">
               <label>Username</label>
@@ -94,12 +104,12 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
               </div>
             </div>
             {error && <div className="error-text mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm font-medium">{error}</div>}
-            <button type="submit" className="btn btn-primary w-full ripple" disabled={loading}>
+            <button type="submit" className="btn btn-primary w-full ripple" disabled={loading} style={{ padding: '0.75rem', fontSize: '0.88rem' }}>
               {loading ? 'Verifying Credentials...' : 'Sign In'}
             </button>
           </form>
-          <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            FSIC Institutional Records System v2.0.3
+          <div style={{ marginTop: '1.75rem', textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+            FSIC Institutional Records System v3.0.0
           </div>
         </div>
       </div>

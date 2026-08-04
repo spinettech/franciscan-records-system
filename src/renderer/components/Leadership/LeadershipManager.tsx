@@ -119,14 +119,14 @@ const LeadershipManager = () => {
 
   return (
     <div className="animate-fade-in p-8" style={{ maxWidth: '1400px', margin: '0 auto' }}>
-      <header className="page-header" style={{ marginBottom: '3rem' }}>
+      <header className="page-header" style={{ marginBottom: '2.5rem' }}>
         <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.03em', color: 'var(--primary)', marginBottom: '0.5rem' }}>Leadership Board</h1>
-          <p className="text-muted" style={{ fontSize: '1.1rem' }}>Historical and current provincial administration records.</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 850, letterSpacing: '-0.02em', color: 'var(--primary)', marginBottom: '0.35rem' }}>Leadership Board</h1>
+          <p className="text-muted" style={{ fontSize: '0.85rem' }}>Historical and current provincial administration records.</p>
         </div>
         {!showForm && (
           <button className="btn btn-primary ripple" onClick={() => setShowForm(true)}>
-            <Plus size={20} /> Assign Position
+            <Plus size={18} /> Assign Position
           </button>
         )}
       </header>
@@ -205,16 +205,16 @@ const LeadershipManager = () => {
           {sortedKeys.map((key) => (
             <div key={key} className="animate-fade-in">
               <div className="flex items-center gap-4 mb-6">
-                <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.25rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{key}</h3>
+                <h3 style={{ margin: 0, fontWeight: 800, fontSize: '1.0rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{key}</h3>
                 <div style={{ flex: 1, height: '2px', background: 'linear-gradient(90deg, var(--border), transparent)' }} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
                 {groupedLeadership[key].map((pos: any) => (
                   <div key={pos.id} className="glass-panel leadership-card" style={{ 
-                    padding: '2rem', 
+                    padding: '1.5rem', 
                     background: 'white', 
                     border: '1px solid var(--border)',
-                    borderRadius: '20px',
+                    borderRadius: '16px',
                     position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
@@ -232,16 +232,16 @@ const LeadershipManager = () => {
                     
                     <div className="flex justify-between items-start mb-5">
                       <div style={{ 
-                        width: '48px', 
-                        height: '48px', 
-                        borderRadius: '12px', 
+                        width: '42px', 
+                        height: '42px', 
+                        borderRadius: '10px', 
                         background: key === 'Current Administration' ? 'rgba(var(--primary-rgb), 0.05)' : '#f8fafc', 
                         display: 'flex', 
                         alignItems: 'center', 
-                        justifyContent: 'center',
+                        justify: 'center',
                         color: key === 'Current Administration' ? 'var(--primary)' : 'var(--text-muted)'
                       }}>
-                        <Award size={24} />
+                        <Award size={20} />
                       </div>
                       <div className="flex gap-2">
                         <button className="icon-btn sm" onClick={() => startEdit(pos)} title="Edit Position"><Pencil size={14} /></button>
@@ -250,8 +250,8 @@ const LeadershipManager = () => {
                     </div>
 
                     <div className="mb-5">
-                      <h4 style={{ margin: 0, fontSize: '0.7rem', fontWeight: 900, color: key === 'Current Administration' ? 'var(--accent)' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.4rem' }}>{pos.title}</h4>
-                      <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1.2 }}>
+                      <h4 style={{ margin: 0, fontSize: '0.68rem', fontWeight: 800, color: key === 'Current Administration' ? 'var(--accent)' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.3rem' }}>{pos.title}</h4>
+                      <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary)', lineHeight: 1.2 }}>
                         {pos.sister?.religiousName || pos.sister?.fullName || pos.name}
                       </h2>
                     </div>

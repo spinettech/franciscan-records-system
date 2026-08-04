@@ -16,8 +16,8 @@ const CommunityCard: React.FC<CommunityCardProps> = ({ comm, onEdit, onDelete, o
           <Building2 size={28} />
         </div>
         <div>
-          <h4 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>{comm.name}</h4>
-          <p className="text-muted" style={{ fontSize: '0.85rem' }}>{comm.location}, {comm.diocese}</p>
+          <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: 0, color: 'var(--primary)' }}>{comm.name}</h4>
+          <p className="text-muted" style={{ fontSize: '0.78rem' }}>{comm.location}, {comm.diocese}</p>
         </div>
       </div>
       <span className={`badge badge-${comm.isActive ? 'success' : 'danger'}`}>
@@ -25,17 +25,17 @@ const CommunityCard: React.FC<CommunityCardProps> = ({ comm, onEdit, onDelete, o
       </span>
     </div>
 
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-      <div className="flex items-center gap-3 text-muted" style={{ fontSize: '0.9rem' }}>
-        <Shield size={18} className="text-accent" /> 
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+      <div className="flex items-center gap-2.5 text-muted" style={{ fontSize: '0.8rem' }}>
+        <Shield size={16} className="text-accent" /> 
         <span>Superior: <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{comm.superiorName || 'Not Assigned'}</span></span>
       </div>
-      <div className="flex items-center gap-3 text-muted" style={{ fontSize: '0.9rem' }}>
-        <Users size={18} className="text-accent" /> 
+      <div className="flex items-center gap-2.5 text-muted" style={{ fontSize: '0.8rem' }}>
+        <Users size={16} className="text-accent" /> 
         <span>Sisters: <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{comm.sistersCount || 0} / {comm.capacity}</span></span>
       </div>
-      <div className="flex items-center gap-3 text-muted" style={{ fontSize: '0.9rem' }}>
-        <Phone size={18} className="text-accent" /> 
+      <div className="flex items-center gap-2.5 text-muted" style={{ fontSize: '0.8rem' }}>
+        <Phone size={16} className="text-accent" /> 
         <span>{comm.contactPhone || 'No direct line'}</span>
       </div>
     </div>
